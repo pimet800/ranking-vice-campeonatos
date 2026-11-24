@@ -104,7 +104,8 @@ window.REGISTROS_OFICIAIS = [
   { ano: 2023, comp: "Campeonato Brasileiro", campeao: "PAL", vice: "GRE", fonte: "CBF", obs: "" },
   { ano: 2024, comp: "Campeonato Brasileiro", campeao: "BOT", vice: "PAL", fonte: "CBF", obs: "" },
   { ano: 2025, comp: "Campeonato Brasileiro", campeao: "FLA", vice: "PAL", fonte: "CBF", obs: "" },
-
+  { ano: 2026, comp: "Campeonato Brasileiro", campeao: "FLA", vice: "PAL", fonte: "CBF", obs: "" },
+  
   // ================= COPA DO BRASIL =================
   { ano: 1989, comp: "Copa do Brasil", campeao: "GRE", vice: "Sport", fonte: "CBF", obs: "" },
   { ano: 1990, comp: "Copa do Brasil", campeao: "FLA", vice: "Goiás", fonte: "CBF", obs: "" },
@@ -204,6 +205,7 @@ window.REGISTROS_OFICIAIS = [
   { ano: 2022, comp: "Copa Sul-Americana", campeao: "Independiente del Valle", vice: "SAO", fonte: "CONMEBOL", obs: "" },
   { ano: 2024, comp: "Copa Sul-Americana", campeao: "Racing", vice: "CRU", fonte: "CONMEBOL", obs: "" },
   { ano: 2025, comp: "Copa Sul-Americana", campeao: "Lanús", vice: "CAM", fonte: "CONMEBOL", obs: "" },
+  { ano: 2026, comp: "Copa Sul-Americana", campeao: "Boca Juniors", vice: "CAM", fonte: "CONMEBOL", obs: "" },
 
   // ================= RECOPA SUL-AMERICANA =================
   { ano: 1992, comp: "Recopa Sul-Americana", campeao: "Colo-Colo", vice: "CRU", fonte: "CONMEBOL", obs: "" },
