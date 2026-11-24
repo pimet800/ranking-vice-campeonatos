@@ -1133,11 +1133,12 @@
     a.download = "ranking_vices_g12.json";
     a.click();
   }
-
-function exportCSV() {
+  
+  function exportCSV() {
     const { records } = computeStats();
-    const header = "id,ano,competicao,campeao,vice,fonte,observacoes\n";
-    const rows = records.map(r => `${r.id},${r.ano},"${r.comp}","${r.campeao}","${r.vice}","${r.fonte}","${r.obs || ""}"`).join("\n");
+    const nl = String.fromCharCode(10);
+    const header = "id,ano,competicao,campeao,vice,fonte,observacoes" + nl;
+    const rows = records.map(r => `${r.id},${r.ano},"${r.comp}","${r.campeao}","${r.vice}","${r.fonte}","${r.obs || ""}"`).join(nl);
     const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
