@@ -1134,20 +1134,13 @@
     a.click();
   }
 
-  function exportCSV() {
+function exportCSV() {
     const { records } = computeStats();
-    const header = "id,ano,competicao,campeao,vice,fonte,observacoes
-";
-    const rows = records.map(r => `${r.id},${r.ano},"${r.comp}","${r.campeao}","${r.vice}","${r.fonte}","${r.obs || ""}"`).join("
-");
+    const header = "id,ano,competicao,campeao,vice,fonte,observacoes\n";
+    const rows = records.map(r => `${r.id},${r.ano},"${r.comp}","${r.campeao}","${r.vice}","${r.fonte}","${r.obs || ""}"`).join("\n");
     const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "ranking_vices_g12.csv";
     a.click();
   }
-
-  window.addEventListener("DOMContentLoaded", init);
-</script>
-</body>
-</html>
