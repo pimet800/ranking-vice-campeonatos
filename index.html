@@ -394,7 +394,7 @@
         <div class="panel-header">
           <div>
             <div class="panel-title">Comparativo Visual</div>
-            <div class="panel-sub">Escudo oficial ao lado da sigla e barra proporcional</div>
+            <div class="panel-sub">Clique em um clube para inspecionar seu histórico completo</div>
           </div>
         </div>
         <div id="visual-bars-container" class="visual-bars-list"></div>
@@ -601,15 +601,15 @@
   const CLUB_MAP = Object.fromEntries(CLUBS.map(c => [c.id, c]));
 
   const COMPETITIONS = [
+    { name: "Campeonato Estadual", cat: "EST", weight: 1 }
+    { name: "Copa do Brasil", cat: "NAC", weight: 3 },    
     { name: "Campeonato Brasileiro", cat: "NAC", weight: 4 },
-    { name: "Copa do Brasil", cat: "NAC", weight: 3 },
     { name: "Supercopa do Brasil", cat: "NAC", weight: 2 },
-    { name: "Copa Libertadores da América", cat: "INT", weight: 5 },
     { name: "Copa Sul-Americana", cat: "INT", weight: 3 },
+    { name: "Copa Libertadores da América", cat: "INT", weight: 5 },
     { name: "Recopa Sul-Americana", cat: "INT", weight: 2 },
     { name: "Mundial de Clubes", cat: "INT", weight: 5 },
     { name: "Super Mundial de Clubes", cat: "INT", weight: 6 },
-    { name: "Campeonato Estadual", cat: "EST", weight: 1 }
   ];
 
   const COMP_MAP = Object.fromEntries(COMPETITIONS.map(c => [c.name, c]));
@@ -707,7 +707,7 @@
     document.getElementById("btn-mode-quant").classList.toggle("active", m === "quant");
     document.getElementById("btn-mode-weight").classList.toggle("active", m === "weight");
     document.getElementById("pill-mode").textContent = m === "quant"
-      ? "Modo: Ranking Quantitativo (1 vice = 1 unidade)"
+      ? "Modo: Ranking Quantitativo (1 vice = 1 ponto)"
       : "Modo: Ranking Ponderado (Soma dos pesos de relevância)";
     document.getElementById("badge-sort-type").textContent = m === "quant"
       ? "Ordenado por: Vices Totais"
