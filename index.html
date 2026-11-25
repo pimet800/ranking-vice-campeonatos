@@ -570,7 +570,7 @@
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
           <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">⚖️ Tabela de Pesos (Ranking Ponderado)</strong>
-          Estadual: <strong>1 pt</strong> • Supercopa / Recopa: <strong>2 pts</strong> • Copa do Brasil / Sul-Americana: <strong>3 pts</strong> • Brasileiro: <strong>4 pts</strong> • Libertadores / Mundial: <strong>5 pts</strong> • Super Mundial: <strong>6 pts</strong>.
+          Brasileiro B: <strong>1 pt</strong> • </strong>Estadual: <strong>2 pt</strong> • Supercopa / Recopa: <strong>3 pts</strong> • Copa do Brasil / Sul-Americana: <strong>4 pts</strong> • Brasileiro A: <strong>5 pts</strong> • Libertadores: <strong>6 pts</strong> • Mundial: <strong>7 pts</strong> • Super Mundial: <strong>8 pts</strong>.
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
           <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">🏟️ Regra do Campeonato Carioca & 1987</strong>
@@ -601,15 +601,16 @@
   const CLUB_MAP = Object.fromEntries(CLUBS.map(c => [c.id, c]));
 
   const COMPETITIONS = [
-    { name: "Campeonato Estadual", cat: "EST", weight: 1 },
-    { name: "Copa do Brasil", cat: "NAC", weight: 3 },
-    { name: "Campeonato Brasileiro", cat: "NAC", weight: 4 },
-    { name: "Supercopa do Brasil", cat: "NAC", weight: 2 },
-    { name: "Copa Sul-Americana", cat: "INT", weight: 3 },
-    { name: "Copa Libertadores da América", cat: "INT", weight: 5 },
-    { name: "Recopa Sul-Americana", cat: "INT", weight: 2 },
-    { name: "Mundial de Clubes", cat: "INT", weight: 5 },
-    { name: "Super Mundial de Clubes", cat: "INT", weight: 6 },
+    { name: "Campeonato Estadual", cat: "EST", weight: 2 },
+    { name: "Copa do Brasil", cat: "NAC", weight: 4 },
+    { name: "Campeonato Brasileiro - Série A", cat: "NAC", weight: 5 },
+    { name: "Campeonato Brasileiro - Série B", cat: "NAC", weight: 1 },
+    { name: "Supercopa do Brasil", cat: "NAC", weight: 3 },
+    { name: "Copa Sul-Americana", cat: "INT", weight: 4 },
+    { name: "Copa Libertadores da América", cat: "INT", weight: 6 },
+    { name: "Recopa Sul-Americana", cat: "INT", weight: 3 },
+    { name: "Mundial de Clubes", cat: "INT", weight: 7 },
+    { name: "Super Mundial de Clubes", cat: "INT", weight: 8 },
   ];
 
   const COMP_MAP = Object.fromEntries(COMPETITIONS.map(c => [c.name, c]));
@@ -959,7 +960,7 @@
 
     // Matriz Cruzada
     const matrix = document.getElementById("matrix-table");
-    const shortNames = ["Brasileiro", "Copa BR", "Supercopa", "Libertadores", "Sul-Amer.", "Recopa", "Mundial", "Super Mund.", "Estadual"];
+    const shortNames = ["Brasileiro A", "Brasileiro B", "Copa BR", "Supercopa", "Libertadores", "Sul-Amer.", "Recopa", "Mundial", "Super Mund.", "Estadual"];
     let html = `<thead><tr><th>Clube</th>${shortNames.map(s => `<th style="text-align:center;">${s}</th>`).join("")}<th style="text-align:right;">Total</th></tr></thead><tbody>`;
     CLUBS.forEach(c => {
       const s = stats[c.id];
