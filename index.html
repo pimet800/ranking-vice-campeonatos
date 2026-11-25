@@ -596,13 +596,12 @@
 
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; font-size:0.86rem; color:var(--text-muted);">
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
-          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">⚖️ Tabela de Pesos Base (Modo Ponderado)</strong>
-           • Brasileiro Série B: <strong>1 pt</strong><br> • Campeonato Estadual: <strong>2 pts</strong><br> • Supercopa do Brasil / Recopa Sul-Americana: <strong>3 pts</strong><br> • Copa do Brasil / Copa Sul-Americana: <strong>4 pts</strong><br> • Brasileiro Série A: <strong>5 pts</strong><br> • Libertadores: <strong>6 pts</strong><br> • Mundial de Clubes: <strong>7 pts</strong><br> • Super Mundial de Clubes: <strong>8 pts</strong>.
+          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">⚖️ Escala de Façanhas (Modo Ponderado)</strong>
+           • Estadual: <strong>1 pt</strong><br> • Supercopa / Recopa: <strong>2 pts</strong><br> • Copa do Brasil / Sul-Americana: <strong>3 pts</strong><br> • Brasileiro Série A: <strong>4 pts</strong><br> • Libertadores: <strong>5 pts</strong><br> • Super Mundial de Clubes: <strong>6 pts</strong><br> • Mundial de Clubes: <strong>7 pts</strong><br> • Brasileiro Série B: <strong>8 pts</strong>.
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
-          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">➕ Critérios Adicionais do Modo Ponderado</strong>
-          • <strong>+1 ponto adicional</strong> se o clube for vice-campeão para outro time brasileiro que não seja integrante do G12.<br>
-          • <strong>+1 ponto adicional</strong> se o clube for vice-campeão da Série B do Campeonato Brasileiro.
+          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">➕ Critério Adicional do Modo Ponderado</strong>
+          • <strong>+1 ponto adicional</strong> se o clube for vice-campeão para outro time brasileiro que não seja integrante do G12 (ex.: clubes do interior ou de divisões inferiores).
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
           <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">🛡️ Regra de Títulos e Vices Divididos</strong>
@@ -651,16 +650,16 @@
 
   // Lista oficial das 10 competições e seus novos pesos exatos
   const COMPETITIONS = [
-    { name: "Campeonato Brasileiro - Série A", short: "Brasileiro A", cat: "NAC", weight: 5 },
-    { name: "Campeonato Brasileiro - Série B", short: "Brasileiro B", cat: "NAC", weight: 1 },
-    { name: "Copa do Brasil", short: "Copa BR", cat: "NAC", weight: 4 },
-    { name: "Supercopa do Brasil", short: "Supercopa", cat: "NAC", weight: 3 },
-    { name: "Copa Libertadores da América", short: "Libertadores", cat: "INT", weight: 6 },
-    { name: "Copa Sul-Americana", short: "Sul-Amer.", cat: "INT", weight: 4 },
-    { name: "Recopa Sul-Americana", short: "Recopa", cat: "INT", weight: 3 },
+    { name: "Campeonato Brasileiro - Série A", short: "Brasileiro A", cat: "NAC", weight: 4 },
+    { name: "Campeonato Brasileiro - Série B", short: "Brasileiro B", cat: "NAC", weight: 8 },
+    { name: "Copa do Brasil", short: "Copa BR", cat: "NAC", weight: 3 },
+    { name: "Supercopa do Brasil", short: "Supercopa", cat: "NAC", weight: 2 },
+    { name: "Copa Libertadores da América", short: "Libertadores", cat: "INT", weight: 5 },
+    { name: "Copa Sul-Americana", short: "Sul-Amer.", cat: "INT", weight: 3 },
+    { name: "Recopa Sul-Americana", short: "Recopa", cat: "INT", weight: 2 },
     { name: "Mundial de Clubes", short: "Mundial", cat: "INT", weight: 7 },
-    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 8 },
-    { name: "Campeonato Estadual", short: "Estadual", cat: "EST", weight: 2 }
+    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 6 },
+    { name: "Campeonato Estadual", short: "Estadual", cat: "EST", weight: 1 }
   ];
 
   const COMP_MAP = Object.fromEntries(COMPETITIONS.map(c => [c.name, c]));
@@ -725,16 +724,10 @@
     let pts = baseWeight;
     const bonuses = [];
 
-    // Regra 3a: Se for vice-campeão para outro time brasileiro fora do G12, +1 ponto
+    // Critério adicional: Se for vice-campeão para outro time brasileiro fora do G12, +1 ponto
     if (NON_G12_BRAZILIAN_CLUBS.has(r.campeao)) {
       pts += 1;
       bonuses.push("+1 brasileiro não-G12");
-    }
-
-    // Regra 3b: Se for vice-campeão da Série B, +1 ponto adicional
-    if (r.comp === "Campeonato Brasileiro - Série B") {
-      pts += 1;
-      bonuses.push("+1 vice Série B");
     }
 
     return { pts, bonuses };
@@ -831,7 +824,7 @@
     document.getElementById("btn-mode-weight").classList.toggle("active", m === "weight");
     document.getElementById("pill-mode").textContent = m === "quant"
       ? "Modo: Ranking Quantitativo (1 vice = 1 unidade)"
-      : "Modo: Ranking Ponderado (Pesos base + bônus não-G12 / Série B)";
+      : "Modo: Ranking Ponderado (Escala de Façanhas 1–8 + bônus não-G12)";
     document.getElementById("badge-sort-type").textContent = m === "quant"
       ? "Ordenado por: Vices Totais"
       : "Ordenado por: Pontuação Ponderada";
