@@ -219,7 +219,7 @@ window.REGISTROS_OFICIAIS = [
   { ano: 1992, comp: "Copa Libertadores da América", campeao: "SAO", vice: "Newell's Old Boys", fonte: "CONMEBOL", obs: "" },
   { ano: 1993, comp: "Copa Libertadores da América", campeao: "SAO", vice: "Universidad Católica", fonte: "CONMEBOL", obs: "" },
   { ano: 1994, comp: "Copa Libertadores da América", campeao: "Vélez Sarsfield", vice: "SAO", fonte: "CONMEBOL", obs: "" },
-  { ano: 1995, comp: "Copa Libertadores da América", campeao: "GRE", vice: "ético Nacional", fonte: "CONMEBOL", obs: "" },
+  { ano: 1995, comp: "Copa Libertadores da América", campeao: "GRE", vice: "Atlético Nacional", fonte: "CONMEBOL", obs: "" },
   { ano: 1997, comp: "Copa Libertadores da América", campeao: "CRU", vice: "Sporting Cristal", fonte: "CONMEBOL", obs: "" },
   { ano: 1998, comp: "Copa Libertadores da América", campeao: "VAS", vice: "Barcelona-EQU", fonte: "CONMEBOL", obs: "" },
   { ano: 1999, comp: "Copa Libertadores da América", campeao: "PAL", vice: "Deportivo Cali", fonte: "CONMEBOL", obs: "" },
