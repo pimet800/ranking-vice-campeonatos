@@ -231,7 +231,7 @@
       background: linear-gradient(90deg, #059669, #10b981);
       transition: width 0.35s ease;
     }
-    .vbar-item:first-child .vbar-fill {
+    .vbar-item.is-leader .vbar-fill {
       background: linear-gradient(90deg, #d97706, #f59e0b);
     }
     .vbar-val {
@@ -256,6 +256,7 @@
     .comp-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem; }
     .comp-card h4 { font-size: 0.95rem; margin-bottom: 0.2rem; display: flex; justify-content: space-between; align-items: center; }
     .weight-tag { font-size: 0.7rem; background: rgba(59,130,246,0.15); color: #60a5fa; padding: 2px 7px; border-radius: 6px; }
+    .bonus-tag { font-size: 0.68rem; background: rgba(245,158,11,0.16); color: var(--accent-gold); padding: 2px 6px; border-radius: 5px; margin-left: 4px; }
     .mini-list { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.45rem; }
     .mini-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.83rem; padding: 4px 6px; border-radius: 6px; background: rgba(255,255,255,0.02); }
 
@@ -283,6 +284,14 @@
     }
     .btn-action:hover { border-color: var(--accent-green); color: var(--accent-green); }
 
+    /* METODOLOGIA RULES */
+    .rules-list { display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 1.25rem; }
+    .rule-item {
+      background: var(--bg-surface); border-left: 3px solid var(--accent-green);
+      padding: 1rem 1.15rem; border-radius: 0 12px 12px 0; font-size: 0.88rem; color: var(--text-muted);
+    }
+    .rule-item strong.rule-title { color: var(--text-main); display: block; margin-bottom: 0.3rem; font-size: 0.95rem; }
+
     code { background: #1e293b; padding: 2px 6px; border-radius: 5px; font-size: 0.82rem; color: #38bdf8; }
   </style>
 </head>
@@ -307,11 +316,11 @@
 
         <select id="sel-1987" class="control-select" onchange="setScenario1987(this.value)">
           <option value="A">1987 • Cenário A (Sport único campeão / Guarani vice)</option>
-          <option value="B">1987 • Cenário B (Sport e Flamengo campeões / Sem vice G12)</option>
+          <option value="B">1987 • Cenário B (Sport e Flamengo campeões / Internacional e Guarani vices)</option>
         </select>
 
         <select id="sel-comp" class="control-select" onchange="setCompFilter(this.value)">
-          <option value="ALL">Competição: Todas (9 elegíveis)</option>
+          <option value="ALL">Competição: Todas (10 elegíveis)</option>
         </select>
       </div>
     </div>
@@ -394,7 +403,7 @@
         <div class="panel-header">
           <div>
             <div class="panel-title">Comparativo Visual</div>
-            <div class="panel-sub">Clique em um clube para inspecionar seu histórico completo</div>
+            <div class="panel-sub">Escudo oficial ao lado da sigla e barra proporcional</div>
           </div>
         </div>
         <div id="visual-bars-container" class="visual-bars-list"></div>
@@ -407,8 +416,8 @@
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">Comparativo: Títulos Conquistados vs. Vice-Campeonatos (Mesmas 9 Competições)</div>
-          <div class="panel-sub">Cruza quantas vezes cada clube do G12 foi campeão e vice nas competições elegíveis</div>
+          <div class="panel-title">Comparativo: Títulos Conquistados vs. Vice-Campeonatos (10 Competições Elegíveis)</div>
+          <div class="panel-sub">Cruza quantas vezes cada clube do G12 foi campeão e vice (sem duplicar títulos divididos)</div>
         </div>
         <div class="segmented">
           <button id="btn-cv-titles" class="active" onclick="setCvSort('titles')">Ordenar por Títulos</button>
@@ -456,7 +465,7 @@
       <div class="panel-header">
         <div>
           <div class="panel-title">Matriz Cruzada: Clubes × Competições (Vice-Campeonatos)</div>
-          <div class="panel-sub">Detalhamento quantitativo completo em todas as 9 competições elegíveis</div>
+          <div class="panel-sub">Detalhamento quantitativo exato em todas as 10 competições elegíveis</div>
         </div>
       </div>
       <div class="table-wrap">
@@ -500,7 +509,7 @@
               <th>Ano</th>
               <th>Competição</th>
               <th>Campeão da Edição</th>
-              <th>Peso</th>
+              <th>Pontuação Ponderada</th>
               <th>Fonte</th>
               <th>Observações Históricas</th>
             </tr>
@@ -554,8 +563,8 @@
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">Transparência Metodológica & Alimentação Fácil da Base</div>
-          <div class="panel-sub">Arquitetura modular: painel visual (index.html) separado da base de dados (dados.js)</div>
+          <div class="panel-title">Regras Metodológicas & Critérios Oficiais do Levantamento (v1.0)</div>
+          <div class="panel-sub">Documentação transparente dos critérios de inclusão, exclusão e pontuação</div>
         </div>
         <div style="display:flex; gap:0.5rem;">
           <button class="btn-action" onclick="exportJSON()">⬇️ Exportar JSON</button>
@@ -563,18 +572,41 @@
         </div>
       </div>
 
+      <div class="rules-list">
+        <div class="rule-item">
+          <strong class="rule-title">1. Clubes Participantes (Recorte v1.0)</strong>
+          Foram considerados para este levantamento apenas os times campeões da Libertadores (G12). Por se tratar da versão 1.0, inserir outros clubes geraria um levantamento massivo de dados. Outros clubes das mesmas federações ou de outras federações poderão ser inseridos nas próximas versões do aplicativo.
+        </div>
+
+        <div class="rule-item">
+          <strong class="rule-title">2. Competições Elegíveis e Torneios Equiparados</strong>
+          Foram considerados apenas torneios em andamento atualmente ou torneios equiparados (como Taça Brasil de 1964 e Torneio Roberto Gomes Pedrosa de 1970). Já torneios extintos, como Torneio Rio-São Paulo, Copa Sul-Minas, Copa Mercosul, etc., não foram inseridos na versão 1.0.
+        </div>
+
+        <div class="rule-item">
+          <strong class="rule-title">3. Regra de Sub-Taças e Turnos Estaduais</strong>
+          Campeonatos que possuem sub-taças, como Taça Guanabara e Taça Rio do campeonato estadual carioca, tiveram apenas um campeão e um vice: os oficiais daquele ano. Logo, ser vice-campeão de uma sub-taça, como a Taça Rio, não é contabilizado para efeitos de estatística.
+        </div>
+
+        <div class="rule-item">
+          <strong class="rule-title">4. Tratamento do Campeonato Brasileiro de 1987</strong>
+          Em 1987, o seletor superior alterna entre <strong>Cenário A</strong> (Sport campeão, Guarani vice) e <strong>Cenário B</strong> (Sport e Flamengo campeões, com Internacional e Guarani vices).
+        </div>
+      </div>
+
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; font-size:0.86rem; color:var(--text-muted);">
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
-          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">📂 Como alimentar novos resultados</strong>
-          Abra apenas o arquivo <code>dados.js</code> no GitHub ou no seu computador e adicione uma única linha no final da lista <code>REGISTROS_OFICIAIS</code> informando <code>ano</code>, <code>comp</code>, <code>campeao</code> e <code>vice</code>. O painel recalcula automaticamente os rankings de vices, títulos e gráficos.
+          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">⚖️ Tabela de Pesos Base (Modo Ponderado)</strong>
+          Brasileiro Série B: <strong>1 pt</strong> • Campeonato Estadual: <strong>2 pts</strong> • Supercopa do Brasil / Recopa Sul-Americana: <strong>3 pts</strong> • Copa do Brasil / Copa Sul-Americana: <strong>4 pts</strong> • Brasileiro Série A: <strong>5 pts</strong> • Libertadores: <strong>6 pts</strong> • Mundial de Clubes: <strong>7 pts</strong> • Super Mundial de Clubes: <strong>8 pts</strong>.
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
-          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">⚖️ Tabela de Pesos (Ranking Ponderado)</strong>
-          Brasileiro B: <strong>1 pt</strong> • </strong>Estadual: <strong>2 pt</strong> • Supercopa / Recopa: <strong>3 pts</strong> • Copa do Brasil / Sul-Americana: <strong>4 pts</strong> • Brasileiro A: <strong>5 pts</strong> • Libertadores: <strong>6 pts</strong> • Mundial: <strong>7 pts</strong> • Super Mundial: <strong>8 pts</strong>.
+          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">➕ Critérios Adicionais do Modo Ponderado</strong>
+          • <strong>+1 ponto adicional</strong> se o clube for vice-campeão para outro time brasileiro que não seja integrante do G12.<br>
+          • <strong>+1 ponto adicional</strong> se o clube for vice-campeão da Série B do Campeonato Brasileiro.
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
-          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">🏟️ Regra do Campeonato Carioca & 1987</strong>
-          No Carioca, contabiliza-se exclusivamente o vice-campeão oficial do campeonato estadual (excluindo Taça Guanabara e Taça Rio). Em 1987, o seletor superior alterna entre Cenário A (Sport campeão, Guarani vice) e Cenário B (Sport e Flamengo campeões, sem vice G12).
+          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">🛡️ Regra de Títulos e Vices Divididos</strong>
+          Nos anos em que o título ou o vice-campeonato foi dividido entre mais de um clube (ex.: Paulistão 1931 e 1970), cada clube recebe exatamente 1 registro pelo seu feito naquela edição, sem duplicar títulos para o campeão ou vices para o mesmo clube.
         </div>
       </div>
     </div>
@@ -600,17 +632,35 @@
 
   const CLUB_MAP = Object.fromEntries(CLUBS.map(c => [c.id, c]));
 
+  // Lista de times brasileiros fora do G12 (para aplicar o bônus +1 pt quando um clube do G12 for vice para um brasileiro não-G12)
+  const NON_G12_BRAZILIAN_CLUBS = new Set([
+    "Bahia", "Fortaleza", "Náutico", "Guarani", "Coritiba", "Bangu", "Sport", "Bragantino",
+    "Vitória", "Portuguesa", "São Caetano", "Athletico-PR", "Goiás", "Criciúma", "Ceará",
+    "Juventude", "Brasiliense", "Santo André", "Paulista", "Figueirense", "Novorizontino",
+    "Água Santa", "Ponte Preta", "Audax", "Ituano", "Botafogo-SP", "São José-SP",
+    "Inter de Limeira", "XV de Piracicaba", "Ypiranga-SP", "CA Fiorentino", "Hespanha FC",
+    "CA Albion", "União Guarani FC", "SC Internacional-SP", "Paulistano", "Auto SC",
+    "Germânia", "São Bento-SP", "União da Lapa", "Campos Elíseos", "AA das Palmeiras",
+    "Mackenzie", "Americano-SP", "São Paulo Athletic", "Nova Iguaçu", "Volta Redonda",
+    "Caxias", "Ypiranga", "Brasil de Pelotas", "Lajeadense", "15 de Novembro", "Ulbra",
+    "América-MG", "Tombense", "Caldense", "Ipatinga", "Villa Nova", "Remo", "Sampaio Corrêa",
+    "Campinense", "Londrina", "CSA", "Anapolina", "Campo Grande", "Juventus-SP", "Uberlândia",
+    "Tuna Luso", "Goytacaz", "Paysandu", "Paraná", "União São João", "America-RJ", "Gama",
+    "Santa Cruz", "Chapecoense", "Joinville", "Atlético-GO", "Avaí", "Mirassol"
+  ]);
+
+  // Lista oficial das 10 competições e seus novos pesos exatos
   const COMPETITIONS = [
-    { name: "Campeonato Estadual", cat: "EST", weight: 2 },
-    { name: "Copa do Brasil", cat: "NAC", weight: 4 },
-    { name: "Campeonato Brasileiro - Série A", cat: "NAC", weight: 5 },
-    { name: "Campeonato Brasileiro - Série B", cat: "NAC", weight: 1 },
-    { name: "Supercopa do Brasil", cat: "NAC", weight: 3 },
-    { name: "Copa Sul-Americana", cat: "INT", weight: 4 },
-    { name: "Copa Libertadores da América", cat: "INT", weight: 6 },
-    { name: "Recopa Sul-Americana", cat: "INT", weight: 3 },
-    { name: "Mundial de Clubes", cat: "INT", weight: 7 },
-    { name: "Super Mundial de Clubes", cat: "INT", weight: 8 },
+    { name: "Campeonato Brasileiro - Série A", short: "Brasileiro A", cat: "NAC", weight: 5 },
+    { name: "Campeonato Brasileiro - Série B", short: "Brasileiro B", cat: "NAC", weight: 1 },
+    { name: "Copa do Brasil", short: "Copa BR", cat: "NAC", weight: 4 },
+    { name: "Supercopa do Brasil", short: "Supercopa", cat: "NAC", weight: 3 },
+    { name: "Copa Libertadores da América", short: "Libertadores", cat: "INT", weight: 6 },
+    { name: "Copa Sul-Americana", short: "Sul-Amer.", cat: "INT", weight: 4 },
+    { name: "Recopa Sul-Americana", short: "Recopa", cat: "INT", weight: 3 },
+    { name: "Mundial de Clubes", short: "Mundial", cat: "INT", weight: 7 },
+    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 8 },
+    { name: "Campeonato Estadual", short: "Estadual", cat: "EST", weight: 2 }
   ];
 
   const COMP_MAP = Object.fromEntries(COMPETITIONS.map(c => [c.name, c]));
@@ -628,15 +678,66 @@
 
   function getRecords() {
     const raw = window.REGISTROS_OFICIAIS || [];
-    return raw.map((r, idx) => {
+    const expanded = [];
+
+    raw.forEach((r) => {
+      const compName = r.comp === "Campeonato Brasileiro" ? "Campeonato Brasileiro - Série A" : r.comp;
+
       // Tratamento especial de 1987
-      if (r.ano === 1987 && r.comp === "Campeonato Brasileiro") {
-        if (state.scenario1987 === "B") {
-          return { ...r, id: idx + 1, campeao: "Sport / FLA", vice: "Nenhum (2 Campeões)" };
+      if (r.ano === 1987 && compName === "Campeonato Brasileiro - Série A") {
+        if (state.scenario1987 === "A") {
+          expanded.push({
+            ...r,
+            comp: compName,
+            campeao: "Sport",
+            vice: "Guarani",
+            obs: "Cenário A (1987): Sport único campeão oficial; Guarani vice-campeão"
+          });
+        } else {
+          // Cenário B: Sport e Flamengo campeões; Internacional e Guarani vices
+          expanded.push({
+            ...r,
+            comp: compName,
+            campeao: "Sport",
+            vice: "Guarani",
+            obs: "Cenário B (1987 - Módulo Amarelo): Sport campeão e Guarani vice"
+          });
+          expanded.push({
+            ...r,
+            comp: compName,
+            campeao: "FLA",
+            vice: "INT",
+            obs: "Cenário B (1987 - Módulo Verde): Flamengo campeão e Internacional vice"
+          });
         }
+        return;
       }
-      return { ...r, id: idx + 1 };
-    }).filter(r => state.compFilter === "ALL" || r.comp === state.compFilter);
+
+      expanded.push({ ...r, comp: compName });
+    });
+
+    return expanded
+      .map((r, idx) => ({ ...r, id: idx + 1 }))
+      .filter(r => state.compFilter === "ALL" || r.comp === state.compFilter);
+  }
+
+  function calculateVicePoints(r, baseWeight) {
+    let pts = baseWeight;
+    const bonuses = [];
+
+    // Regra 3a: Se for vice-campeão para outro time brasileiro fora do G12, +1 ponto
+    if (NON_G12_BRAZILIAN_CLUBS.has(r.campeao)) {
+      pts += 1;
+      bonuses.push("+1 brasileiro não-G12");
+    }
+
+    // Regra 3b: Se for vice-campeão da Série B, +1 ponto adicional
+    if (r.comp === "Campeonato Brasileiro - Série B") {
+      pts += 1;
+      bonuses.push("+1 vice Série B");
+    }
+
+    return { pts, bonuses };
   }
 
   function computeStats() {
@@ -658,28 +759,48 @@
       COMPETITIONS.forEach(cp => { stats[c.id].byComp[cp.name] = 0; });
     });
 
+    // Rastreadores de unicidade para evitar dupla contagem em títulos ou vices divididos no mesmo ano/torneio
+    const countedTitles = new Set();
+    const countedVices = new Set();
+
     records.forEach(r => {
       const compMeta = COMP_MAP[r.comp] || { cat: "NAC", weight: 1 };
-      // Contabiliza Vice
+
+      // 1. Contabiliza Vice-Campeonato (máximo 1 vez por clube na mesma edição/torneio)
       if (stats[r.vice]) {
-        const s = stats[r.vice];
-        s.vices += 1;
-        s.points += compMeta.weight;
-        if (compMeta.cat === "NAC") s.nac += 1;
-        if (compMeta.cat === "INT") s.int += 1;
-        if (compMeta.cat === "EST") s.est += 1;
-        s.byComp[r.comp] = (s.byComp[r.comp] || 0) + 1;
-        s.records.push({ ...r, weight: compMeta.weight, cat: compMeta.cat });
-      }
-      // Contabiliza Título (inclusive Flamengo no Cenário B de 1987)
-      if (r.campeao === "Sport / FLA") {
-        if (stats["FLA"]) {
-          stats["FLA"].titles += 1;
-          stats["FLA"].titlePoints += compMeta.weight;
+        const viceKey = `${r.vice}|${r.ano}|${r.comp}|${r.obs || ""}`;
+        // Caso haja duas linhas no mesmo ano por divisão de vice (ex: 1970 PAL e Ponte Preta), cada vice é distinto (PAL != Ponte Preta)
+        const uniqueEditionViceKey = `${r.vice}|${r.ano}|${r.comp}|${r.fonte}`;
+        if (!countedVices.has(uniqueEditionViceKey)) {
+          countedVices.add(uniqueEditionViceKey);
+          const s = stats[r.vice];
+          const { pts, bonuses } = calculateVicePoints(r, compMeta.weight);
+
+          s.vices += 1;
+          s.points += pts;
+          if (compMeta.cat === "NAC") s.nac += 1;
+          if (compMeta.cat === "INT") s.int += 1;
+          if (compMeta.cat === "EST") s.est += 1;
+          s.byComp[r.comp] = (s.byComp[r.comp] || 0) + 1;
+          s.records.push({
+            ...r,
+            baseWeight: compMeta.weight,
+            weight: pts,
+            bonuses,
+            cat: compMeta.cat
+          });
         }
-      } else if (stats[r.campeao]) {
-        stats[r.campeao].titles += 1;
-        stats[r.campeao].titlePoints += compMeta.weight;
+      }
+
+      // 2. Contabiliza Título (máximo 1 vez por clube na mesma edição/torneio/liga — corrige 1931, 1970, 1962, 1950, etc.)
+      if (stats[r.campeao]) {
+        // Inclui fonte para preservar 2 títulos legítimos no mesmo ano quando houve duas ligas distintas (ex: 1967 Taça Brasil + Robertão, ou 1916 LPF + APEA)
+        const uniqueEditionTitleKey = `${r.campeao}|${r.ano}|${r.comp}|${r.fonte}`;
+        if (!countedTitles.has(uniqueEditionTitleKey)) {
+          countedTitles.add(uniqueEditionTitleKey);
+          stats[r.campeao].titles += 1;
+          stats[r.campeao].titlePoints += compMeta.weight;
+        }
       }
     });
 
@@ -708,8 +829,8 @@
     document.getElementById("btn-mode-quant").classList.toggle("active", m === "quant");
     document.getElementById("btn-mode-weight").classList.toggle("active", m === "weight");
     document.getElementById("pill-mode").textContent = m === "quant"
-      ? "Modo: Ranking Quantitativo (1 vice = 1 ponto)"
-      : "Modo: Ranking Ponderado (Soma dos pesos de relevância)";
+      ? "Modo: Ranking Quantitativo (1 vice = 1 unidade)"
+      : "Modo: Ranking Ponderado (Pesos base + bônus não-G12 / Série B)";
     document.getElementById("badge-sort-type").textContent = m === "quant"
       ? "Ordenado por: Vices Totais"
       : "Ordenado por: Pontuação Ponderada";
@@ -721,7 +842,7 @@
     state.scenario1987 = val;
     document.getElementById("pill-1987").textContent = val === "A"
       ? "Critério 1987: Cenário A — Sport único campeão, Guarani vice (0 vices atribuídos ao G12)"
-      : "Critério 1987: Cenário B — Sport e Flamengo campeões (+1 título para FLA; 0 vices atribuídos ao G12)";
+      : "Critério 1987: Cenário B — Sport e Flamengo campeões; Internacional e Guarani vices (+1 título FLA, +1 vice INT)";
     renderAll();
   }
 
@@ -762,11 +883,18 @@
     // Atualiza KPIs
     document.getElementById("lbl-total-records").textContent = records.length;
     const leader = list[0];
-    const metricVal = state.mode === "weight" ? leader.points : leader.vices;
-    document.getElementById("kpi-leader").innerHTML = `<img src="${leader.crest}" class="crest-img" alt="${leader.nome}"> ${leader.nome}`;
-    document.getElementById("kpi-leader-foot").textContent = state.mode === "weight"
-      ? `${leader.points} pontos ponderados (${leader.vices} vices)`
-      : `${leader.vices} vice-campeonatos oficiais (${leader.points} pts)`;
+    const leaderVal = state.mode === "weight" ? leader.points : leader.vices;
+
+    // Regra 4: Se nenhum clube do G12 tiver vice-campeonato no recorte (ex: Super Mundial), exibir "—"
+    if (leaderVal > 0) {
+      document.getElementById("kpi-leader").innerHTML = `<img src="${leader.crest}" class="crest-img" alt="${leader.nome}"> ${leader.nome}`;
+      document.getElementById("kpi-leader-foot").textContent = state.mode === "weight"
+        ? `${leader.points} pontos ponderados (${leader.vices} vices)`
+        : `${leader.vices} vice-campeonatos oficiais (${leader.points} pts)`;
+    } else {
+      document.getElementById("kpi-leader").textContent = "—";
+      document.getElementById("kpi-leader-foot").textContent = "Nenhum vice-campeonato do G12 neste torneio";
+    }
 
     const totalSum = list.reduce((acc, c) => acc + (state.mode === "weight" ? c.points : c.vices), 0);
     document.getElementById("kpi-total").textContent = totalSum;
@@ -780,7 +908,7 @@
       document.getElementById("kpi-recent-foot").textContent = `${rec.comp} • Campeão: ${CLUB_MAP[rec.campeao]?.nome || rec.campeao}`;
     } else {
       document.getElementById("kpi-recent").textContent = "—";
-      document.getElementById("kpi-recent-foot").textContent = "Sem registros no filtro";
+      document.getElementById("kpi-recent-foot").textContent = "Sem registros do G12 no filtro";
     }
 
     renderRankingTable(list);
@@ -796,10 +924,11 @@
     const tbody = document.getElementById("tbody-ranking");
     tbody.innerHTML = list.map((c, i) => {
       const val = state.mode === "weight" ? c.points : c.vices;
-      const pct = Math.round((val / maxVal) * 100);
-      const posClass = i === 0 ? "pos-1" : i === 1 ? "pos-2" : i === 2 ? "pos-3" : "";
+      const isLeader = i === 0 && val > 0;
+      const pct = val > 0 ? Math.round((val / maxVal) * 100) : 0;
+      const posClass = val > 0 ? (i === 0 ? "pos-1" : i === 1 ? "pos-2" : i === 2 ? "pos-3" : "") : "";
       return `
-        <tr class="club-row ${i === 0 ? "leader-row" : ""}" onclick="inspectClub('${c.id}')">
+        <tr class="club-row ${isLeader ? "leader-row" : ""}" onclick="inspectClub('${c.id}')">
           <td><span class="pos-badge ${posClass}">${i + 1}</span></td>
           <td>
             <div class="club-cell">
@@ -833,11 +962,12 @@
   function renderVisualBars(list) {
     const maxVal = Math.max(...list.map(c => state.mode === "weight" ? c.points : c.vices), 1);
     const container = document.getElementById("visual-bars-container");
-    container.innerHTML = list.map(c => {
+    container.innerHTML = list.map((c, i) => {
       const val = state.mode === "weight" ? c.points : c.vices;
-      const pct = Math.max(Math.round((val / maxVal) * 100), 2);
+      const pct = val > 0 ? Math.max(Math.round((val / maxVal) * 100), 2) : 0;
+      const isLeader = i === 0 && val > 0;
       return `
-        <div class="vbar-item" onclick="inspectClub('${c.id}')" title="${c.nome}: ${val}">
+        <div class="vbar-item ${isLeader ? 'is-leader' : ''}" onclick="inspectClub('${c.id}')" title="${c.nome}: ${val}">
           <div class="vbar-club">
             <img src="${c.crest}" class="crest-sm" alt="${c.id}">
             <span>${c.id}</span>
@@ -851,7 +981,7 @@
     }).join("");
   }
 
-  // Nova Aba: Campeões vs. Vices
+  // Aba: Campeões vs. Vices
   function renderCampeoesVsVices() {
     const { stats } = computeStats();
     const list = Object.values(stats).map(c => {
@@ -875,7 +1005,7 @@
       const saldoStr = c.saldo > 0 ? `+${c.saldo}` : `${c.saldo}`;
       return `
         <tr class="club-row" onclick="inspectClub('${c.id}')">
-          <td><span class="pos-badge ${i < 3 ? 'pos-' + (i+1) : ''}">${i + 1}</span></td>
+          <td><span class="pos-badge ${i < 3 && c.tVal > 0 ? 'pos-' + (i+1) : ''}">${i + 1}</span></td>
           <td>
             <div class="club-cell">
               <img src="${c.crest}" class="crest-img" alt="${c.nome}">
@@ -958,16 +1088,19 @@
       `;
     }).join("");
 
-    // Matriz Cruzada
+    // Regra 5: Matriz Cruzada alinhada exatamente à ordem de COMPETITIONS (usando cp.short)
     const matrix = document.getElementById("matrix-table");
-    const shortNames = ["Brasileiro A", "Brasileiro B", "Copa BR", "Supercopa", "Libertadores", "Sul-Amer.", "Recopa", "Mundial", "Super Mund.", "Estadual"];
-    let html = `<thead><tr><th>Clube</th>${shortNames.map(s => `<th style="text-align:center;">${s}</th>`).join("")}<th style="text-align:right;">Total</th></tr></thead><tbody>`;
+    let html = `<thead><tr><th>Clube</th>${COMPETITIONS.map(cp => `<th style="text-align:center;" title="${cp.name}">${cp.short}</th>`).join("")}<th style="text-align:right;">Total</th></tr></thead><tbody>`;
     CLUBS.forEach(c => {
       const s = stats[c.id];
+      const rowTotal = COMPETITIONS.reduce((acc, cp) => acc + (s.byComp[cp.name] || 0), 0);
       html += `<tr class="club-row" onclick="inspectClub('${c.id}')">
         <td><div class="club-cell"><img src="${c.crest}" class="crest-sm" alt="${c.id}"> ${c.id}</div></td>
-        ${COMPETITIONS.map(cp => `<td style="text-align:center; color:${s.byComp[cp.name] ? 'var(--text-main)' : 'var(--text-muted)'}; font-weight:${s.byComp[cp.name] ? '700' : '400'};">${s.byComp[cp.name] || 0}</td>`).join("")}
-        <td style="text-align:right; font-weight:800; color:var(--accent-green);">${s.vices}</td>
+        ${COMPETITIONS.map(cp => {
+          const val = s.byComp[cp.name] || 0;
+          return `<td style="text-align:center; color:${val ? 'var(--text-main)' : 'var(--text-muted)'}; font-weight:${val ? '700' : '400'};">${val}</td>`;
+        }).join("")}
+        <td style="text-align:right; font-weight:800; color:var(--accent-green);">${rowTotal}</td>
       </tr>`;
     });
     html += "</tbody>";
@@ -1019,10 +1152,10 @@
     charts.clubComp = new Chart(ctxComp, {
       type: "doughnut",
       data: {
-        labels: COMPETITIONS.map(c => c.name),
+        labels: COMPETITIONS.map(c => c.short),
         datasets: [{
           data: COMPETITIONS.map(c => s.byComp[c.name] || 0),
-          backgroundColor: ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#6366f1", "#64748b"],
+          backgroundColor: ["#10b981", "#14b8a6", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#6366f1", "#64748b"],
           borderWidth: 0
         }]
       },
@@ -1033,7 +1166,7 @@
     });
 
     // Gráfico por década
-    const decades = ["1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"];
+    const decades = ["1910s", "1920s", "1930s", "1940s", "1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"];
     const decCounts = decades.map(d => {
       const start = parseInt(d);
       return s.records.filter(r => r.ano >= start && r.ano < start + 10).length;
@@ -1051,7 +1184,7 @@
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: "#9ca3af" }, grid: { display: false } },
+          x: { ticks: { color: "#9ca3af", font: { size: 10 } }, grid: { display: false } },
           y: { ticks: { color: "#9ca3af", stepSize: 1 }, grid: { color: "rgba(255,255,255,0.06)" } }
         }
       }
@@ -1068,12 +1201,15 @@
       const champLabel = champObj
         ? `<span style="display:inline-flex; align-items:center; gap:5px;"><img src="${champObj.crest}" class="crest-sm"> ${champObj.nome}</span>`
         : r.campeao;
+      const bonusHtml = r.bonuses && r.bonuses.length
+        ? r.bonuses.map(b => `<span class="bonus-tag">${b}</span>`).join("")
+        : "";
       return `
         <tr>
           <td><strong>${r.ano}</strong></td>
           <td>${r.comp}</td>
           <td>${champLabel}</td>
-          <td><span class="weight-tag">${r.weight} pt(s)</span></td>
+          <td><span class="weight-tag">${r.weight} pt(s)</span>${bonusHtml}</td>
           <td><code>${r.fonte}</code></td>
           <td style="color:var(--text-muted); font-size:0.8rem;">${r.obs || "—"}</td>
         </tr>
@@ -1082,7 +1218,7 @@
   }
 
   function renderEvolution(records, stats) {
-    const decades = [1960, 1970, 1980, 1990, 2000, 2010, 2020];
+    const decades = [1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020];
     const top6 = Object.values(stats).sort((a, b) => b.vices - a.vices).slice(0, 6);
 
     const ctx = document.getElementById("chart-evolution");
@@ -1134,7 +1270,7 @@
     a.download = "ranking_vices_g12.json";
     a.click();
   }
-  
+
   function exportCSV() {
     const { records } = computeStats();
     const nl = String.fromCharCode(10);
