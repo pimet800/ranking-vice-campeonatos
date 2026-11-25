@@ -418,9 +418,9 @@
           <div class="panel-sub">Cruza quantas vezes cada clube do G12 foi campeão e vice (sem duplicar títulos divididos)</div>
         </div>
         <div class="segmented">
-          <button id="btn-cv-titles" class="active" onclick="setCvSort('titles')">Ordenar por Títulos</button>
-          <button id="btn-cv-rate" onclick="setCvSort('rate')">Ordenar por Aproveitamento</button>
-          <button id="btn-cv-saldo" onclick="setCvSort('saldo')">Ordenar por Saldo (Títulos - Vices)</button>
+          <button id="btn-cv-titles" class="active" onclick="setCvSort('vices')">Ordenar por Vices</button>
+          <button id="btn-cv-vices" onclick="setCvSort('titles')">Ordenar por Títulos</button>
+          <button id="btn-cv-saldo" onclick="setCvSort('saldo')">Ordenar por Saldo (Vices - Títulos)</button>
         </div>
       </div>
 
@@ -432,8 +432,7 @@
               <th>Clube</th>
               <th style="text-align:center;">Títulos</th>
               <th style="text-align:center;">Vices</th>
-              <th style="text-align:center;">Saldo (T - V)</th>
-              <th style="text-align:center;" title="Percentual de vices sobre o total de decisões (Vices ÷ [Títulos + Vices])">Aprov. de Vices</th>
+              <th style="text-align:center;">Saldo (V - T)</th>
               <th>Proporção (Títulos vs. Vices)</th>
             </tr>
           </thead>
@@ -600,8 +599,8 @@
           • Copa do Brasil / Sul-Americana: <strong>3 pts</strong><br>
           • Brasileiro Série A: <strong>4 pts</strong><br>
           • Libertadores: <strong>5 pts</strong><br>
-          • Mundial de Clubes: <strong>6 pts</strong><br>
-          • Super Mundial de Clubes: <strong>7 pts</strong><br>
+          • Super Mundial de Clubes: <strong>6 pts</strong><br>
+          • Mundial de Clubes: <strong>7 pts</strong><br>
           • Brasileiro Série B: <strong>8 pts</strong>
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
@@ -672,8 +671,8 @@
     { name: "Copa Libertadores da América", short: "Libertadores", cat: "INT", weight: 5 },
     { name: "Copa Sul-Americana", short: "Sul-Amer.", cat: "INT", weight: 3 },
     { name: "Recopa Sul-Americana", short: "Recopa", cat: "INT", weight: 2 },
-    { name: "Mundial de Clubes", short: "Mundial", cat: "INT", weight: 6 },
-    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 7 },
+    { name: "Mundial de Clubes", short: "Mundial", cat: "INT", weight: 7 },
+    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 6 },
     { name: "Campeonato Estadual", short: "Estadual", cat: "EST", weight: 1 }
   ];
 
@@ -861,7 +860,7 @@
   function setCvSort(val) {
     state.cvSort = val;
     document.getElementById("btn-cv-titles").classList.toggle("active", val === "titles");
-    document.getElementById("btn-cv-rate").classList.toggle("active", val === "rate");
+    document.getElementById("btn-cv-vices").classList.toggle("active", val === "vices");
     document.getElementById("btn-cv-saldo").classList.toggle("active", val === "saldo");
     renderCampeoesVsVices();
   }
@@ -991,6 +990,15 @@
     }).join("");
   }
 
+  // Cache de imagens dos escudos para renderização no eixo X do gráfico Chart.js
+  const CREST_IMG_CACHE = {};
+  CLUBS.forEach(c => {
+    const img = new Image();
+    img.src = c.crest;
+    img.onload = () => { if (charts.cv) charts.cv.draw(); };
+    CREST_IMG_CACHE[c.id] = img;
+  });
+
   // Aba: Campeões vs. Vices
   function renderCampeoesVsVices() {
     const { stats } = computeStats();
@@ -998,14 +1006,14 @@
       const tVal = state.mode === "weight" ? c.titlePoints : c.titles;
       const vVal = state.mode === "weight" ? c.points : c.vices;
       const finals = c.titles + c.vices;
-      const rate = finals > 0 ? ((c.vices / finals) * 100) : 0;
-      return { ...c, tVal, vVal, saldo: tVal - vVal, rate, finals };
+      const saldo = vVal - tVal; // Saldo (V - T): positivo quando tem mais vices que títulos
+      return { ...c, tVal, vVal, saldo, finals };
     });
 
     list.sort((a, b) => {
-      if (state.cvSort === "rate") return (b.rate - a.rate) || (b.tVal - a.tVal);
-      if (state.cvSort === "saldo") return (b.saldo - a.saldo) || (b.tVal - a.tVal);
-      return (b.tVal - a.tVal) || (b.rate - a.rate);
+      if (state.cvSort === "vices") return (b.vVal - a.vVal) || (b.saldo - a.saldo);
+      if (state.cvSort === "saldo") return (b.saldo - a.saldo) || (b.vVal - a.vVal);
+      return (b.tVal - a.tVal) || (b.vVal - a.vVal);
     });
 
     const tbody = document.getElementById("tbody-cv");
@@ -1013,7 +1021,8 @@
       const winPct = c.finals > 0 ? Math.round((c.titles / c.finals) * 100) : 50;
       const saldoClass = c.saldo > 0 ? "cv-badge-pos" : c.saldo < 0 ? "cv-badge-neg" : "cv-badge-neu";
       const saldoStr = c.saldo > 0 ? `+${c.saldo}` : `${c.saldo}`;
-      const posClass = (i === 0 && c.tVal > 0) ? "pos-1" : "";
+      const isLeader = i === 0 && (state.cvSort === "vices" ? c.vVal > 0 : state.cvSort === "saldo" ? c.saldo > 0 : c.tVal > 0);
+      const posClass = isLeader ? "pos-1" : "";
       return `
         <tr class="club-row" onclick="inspectClub('${c.id}')">
           <td><span class="pos-badge ${posClass}">${i + 1}</span></td>
@@ -1026,7 +1035,6 @@
           <td style="text-align:center; font-weight:800; color:var(--accent-green); font-size:1rem;">${c.tVal}</td>
           <td style="text-align:center; font-weight:800; color:var(--accent-gold); font-size:1rem;">${c.vVal}</td>
           <td style="text-align:center;" class="${saldoClass}">${saldoStr}</td>
-          <td style="text-align:center; font-weight:700;">${c.rate.toFixed(1)}%</td>
           <td>
             <div class="dual-bar" title="Títulos: ${winPct}% | Vices: ${100 - winPct}%">
               <div class="dual-bar-win" style="width:${winPct}%"></div>
@@ -1037,13 +1045,31 @@
       `;
     }).join("");
 
-    // Gráfico agrupado Títulos vs Vices
+    // Plugin para desenhar os escudos dos clubes no eixo X no lugar das siglas
+    const xAxisCrestPlugin = {
+      id: "xAxisCrestPlugin",
+      afterDraw(chart) {
+        const { ctx, scales: { x } } = chart;
+        if (!x) return;
+        const size = 26;
+        list.forEach((club, idx) => {
+          const img = CREST_IMG_CACHE[club.id];
+          if (img && img.complete && img.naturalWidth > 0) {
+            const xPos = x.getPixelForTick(idx);
+            const yPos = x.top + 8;
+            ctx.drawImage(img, xPos - size / 2, yPos, size, size);
+          }
+        });
+      }
+    };
+
+    // Gráfico agrupado Títulos vs Vices com escudos no eixo X
     const ctx = document.getElementById("chart-cv");
     if (charts.cv) charts.cv.destroy();
     charts.cv = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: list.map(c => c.id),
+        labels: list.map(c => c.nome),
         datasets: [
           {
             label: state.mode === "weight" ? "Pontos de Títulos" : "Títulos",
@@ -1059,13 +1085,28 @@
           }
         ]
       },
+      plugins: [xAxisCrestPlugin],
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: "#e5e7eb" } } },
+        layout: {
+          padding: { bottom: 26 }
+        },
+        plugins: {
+          legend: { labels: { color: "#e5e7eb" } }
+        },
         scales: {
-          x: { ticks: { color: "#e5e7eb", font: { weight: "bold" } }, grid: { display: false } },
-          y: { ticks: { color: "#9ca3af" }, grid: { color: "rgba(255,255,255,0.06)" } }
+          x: {
+            ticks: {
+              color: "transparent",
+              font: { size: 14 }
+            },
+            grid: { display: false }
+          },
+          y: {
+            ticks: { color: "#9ca3af" },
+            grid: { color: "rgba(255,255,255,0.06)" }
+          }
         }
       }
     });
