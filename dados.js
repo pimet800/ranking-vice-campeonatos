@@ -305,6 +305,7 @@ window.REGISTROS_OFICIAIS = [
 
   // ================= CAMPEONATOS ESTADUAIS =================
   // --- Campeonato Paulista (FPF / LFESP / LPF / APEA / LAF) ---
+// --- Campeonato Paulista (FPF / LFESP / LPF / APEA / LAF) ---
   { ano: 2026, comp: "Campeonato Estadual", campeao: "PAL", vice: "Novorizontino", fonte: "FPF", obs: "Paulistão 2026 (Grêmio Novorizontino SAF)" },
   { ano: 2025, comp: "Campeonato Estadual", campeao: "COR", vice: "PAL", fonte: "FPF", obs: "Paulistão 2025" },
   { ano: 2024, comp: "Campeonato Estadual", campeao: "PAL", vice: "SAN", fonte: "FPF", obs: "Paulistão 2024" },
