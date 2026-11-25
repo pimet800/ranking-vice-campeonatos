@@ -141,7 +141,7 @@
     .kpi-card.blue::before { background: var(--accent-blue); }
     .kpi-card.purple::before { background: var(--accent-purple); }
     .kpi-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 700; }
-    .kpi-val { font-size: 1.85rem; font-weight: 800; margin: 0.3rem 0 0.15rem; display: flex; align-items: center; gap: 0.6rem; }
+    .kpi-val { font-size: 1.45rem; font-weight: 800; margin: 0.35rem 0 0.2rem; display: flex; align-items: center; gap: 0.6rem; min-height: 32px; }
     .kpi-foot { font-size: 0.78rem; color: var(--text-muted); }
 
     /* PANELS */
@@ -354,19 +354,19 @@
       <div class="kpi-foot" id="kpi-leader-foot">—</div>
     </div>
     <div class="kpi-card green">
-      <div class="kpi-label">Total no Recorte Atual</div>
-      <div class="kpi-val" id="kpi-total">0</div>
-      <div class="kpi-foot">Soma dos 12 clubes selecionados</div>
-    </div>
-    <div class="kpi-card blue">
-      <div class="kpi-label">Média por Clube (G12)</div>
-      <div class="kpi-val" id="kpi-avg">0.0</div>
-      <div class="kpi-foot">Distribuição histórica no recorte</div>
+      <div class="kpi-label">Mais Vices p/ Não-G12 (BR)</div>
+      <div class="kpi-val" id="kpi-nong12-leader">—</div>
+      <div class="kpi-foot" id="kpi-nong12-leader-foot">—</div>
     </div>
     <div class="kpi-card purple">
       <div class="kpi-label">Vice Mais Recente</div>
       <div class="kpi-val" id="kpi-recent" style="font-size:1.15rem;">—</div>
       <div class="kpi-foot" id="kpi-recent-foot">—</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Vice Mais Antigo (Não-G12 BR)</div>
+      <div class="kpi-val" id="kpi-nong12-oldest" style="font-size:1.15rem;">—</div>
+      <div class="kpi-foot" id="kpi-nong12-oldest-foot">—</div>
     </div>
   </section>
 
@@ -684,7 +684,7 @@
     scenario1987: "A",  // 'A' | 'B'
     compFilter: "ALL",
     selectedClub: "FLA",
-    cvSort: "titles"    // 'titles' | 'rate' | 'saldo'
+    cvSort: "vices"     // 'vices' | 'titles' | 'saldo'
   };
 
   let charts = {};
@@ -754,6 +754,7 @@
       stats[c.id] = {
         ...c,
         vices: 0,
+        nonG12Vices: 0,
         points: 0,
         titles: 0,
         titlePoints: 0,
@@ -769,6 +770,7 @@
     // Rastreadores de unicidade para evitar dupla contagem em títulos ou vices divididos no mesmo ano/torneio
     const countedTitles = new Set();
     const countedVices = new Set();
+    const allNonG12ViceEvents = [];
 
     records.forEach(r => {
       const compMeta = COMP_MAP[r.comp] || { cat: "NAC", weight: 1 };
@@ -780,8 +782,16 @@
           countedVices.add(uniqueEditionViceKey);
           const s = stats[r.vice];
           const { pts, bonuses } = calculateVicePoints(r, compMeta.weight);
+          const isNonG12Champ = NON_G12_BRAZILIAN_CLUBS.has(r.campeao);
 
           s.vices += 1;
+          if (isNonG12Champ) {
+            s.nonG12Vices += 1;
+            allNonG12ViceEvents.push({
+              ...r,
+              clubObj: s
+            });
+          }
           s.points += pts;
           if (compMeta.cat === "NAC") s.nac += 1;
           if (compMeta.cat === "INT") s.int += 1;
@@ -810,7 +820,7 @@
       }
     });
 
-    return { records, stats };
+    return { records, stats, allNonG12ViceEvents };
   }
 
   function init() {
@@ -884,17 +894,18 @@
   }
 
   function renderAll() {
-    const { records, stats } = computeStats();
+    const { records, stats, allNonG12ViceEvents } = computeStats();
     const list = Object.values(stats).sort((a, b) => {
       if (state.mode === "weight") return (b.points - a.points) || (b.vices - a.vices);
       return (b.vices - a.vices) || (b.points - a.points);
     });
 
-    // Atualiza KPIs
+    // Atualiza barra de status
     document.getElementById("lbl-total-records").textContent = records.length;
+
+    // 1. Card: Líder de Vice-Campeonatos
     const leader = list[0];
     const leaderVal = state.mode === "weight" ? leader.points : leader.vices;
-
     if (leaderVal > 0) {
       document.getElementById("kpi-leader").innerHTML = `<img src="${leader.crest}" class="crest-img" alt="${leader.nome}"> ${leader.nome}`;
       document.getElementById("kpi-leader-foot").textContent = state.mode === "weight"
@@ -905,10 +916,29 @@
       document.getElementById("kpi-leader-foot").textContent = "Nenhum vice-campeonato do G12 neste torneio";
     }
 
-    const totalSum = list.reduce((acc, c) => acc + (state.mode === "weight" ? c.points : c.vices), 0);
-    document.getElementById("kpi-total").textContent = totalSum;
-    document.getElementById("kpi-avg").textContent = (totalSum / 12).toFixed(1);
+    // 2. Card: Mais Vices p/ Campeões de Fora do G12 (BR)
+    const nonG12Ranking = Object.values(stats)
+      .filter(c => c.nonG12Vices > 0)
+      .sort((a, b) => (b.nonG12Vices - a.nonG12Vices) || (b.vices - a.vices));
 
+    if (nonG12Ranking.length > 0) {
+      const topNonG12 = nonG12Ranking[0];
+      const tiedClubs = nonG12Ranking.filter(c => c.nonG12Vices === topNonG12.nonG12Vices);
+      if (tiedClubs.length === 1) {
+        document.getElementById("kpi-nong12-leader").innerHTML = `<img src="${topNonG12.crest}" class="crest-img" alt="${topNonG12.nome}"> ${topNonG12.nome}`;
+        document.getElementById("kpi-nong12-leader-foot").textContent = `${topNonG12.nonG12Vices} vice(s) para campeões brasileiros fora do G12`;
+      } else {
+        const crestsHtml = tiedClubs.map(c => `<img src="${c.crest}" class="crest-sm" alt="${c.id}" title="${c.nome}">`).join("");
+        const idsText = tiedClubs.map(c => c.id).join(" / ");
+        document.getElementById("kpi-nong12-leader").innerHTML = `${crestsHtml} <span style="font-size:1.15rem;">${idsText}</span>`;
+        document.getElementById("kpi-nong12-leader-foot").textContent = `Empate com ${topNonG12.nonG12Vices} vice(s) cada para não-G12 (BR)`;
+      }
+    } else {
+      document.getElementById("kpi-nong12-leader").textContent = "—";
+      document.getElementById("kpi-nong12-leader-foot").textContent = "Nenhum vice para campeão brasileiro fora do G12";
+    }
+
+    // 3. Card: Vice Mais Recente (trocado de posição com o 4º card)
     const g12Vices = records.filter(r => CLUB_MAP[r.vice]).sort((a, b) => b.ano - a.ano);
     if (g12Vices.length > 0) {
       const rec = g12Vices[0];
@@ -918,6 +948,35 @@
     } else {
       document.getElementById("kpi-recent").textContent = "—";
       document.getElementById("kpi-recent-foot").textContent = "Sem registros do G12 no filtro";
+    }
+
+    // 4. Card: Vice Mais Antigo de Campeão de Fora do G12 (BR)
+    if (allNonG12ViceEvents.length > 0) {
+      const oldestEvents = [...allNonG12ViceEvents].sort((a, b) => a.ano - b.ano);
+      const firstEv = oldestEvents[0];
+      const sameYearEvents = oldestEvents.filter(e => e.ano === firstEv.ano);
+      const uniqueOldClubs = [];
+      const seenOldIds = new Set();
+      sameYearEvents.forEach(e => {
+        if (!seenOldIds.has(e.clubObj.id)) {
+          seenOldIds.add(e.clubObj.id);
+          uniqueOldClubs.push(e);
+        }
+      });
+
+      if (uniqueOldClubs.length === 1) {
+        const cObj = uniqueOldClubs[0].clubObj;
+        document.getElementById("kpi-nong12-oldest").innerHTML = `<img src="${cObj.crest}" class="crest-sm" alt="${cObj.nome}"> ${cObj.nome} (${firstEv.ano})`;
+        document.getElementById("kpi-nong12-oldest-foot").textContent = `${firstEv.comp} • Campeão: ${firstEv.campeao}`;
+      } else {
+        const crestsHtml = uniqueOldClubs.map(e => `<img src="${e.clubObj.crest}" class="crest-sm" alt="${e.clubObj.id}">`).join("");
+        const idsText = uniqueOldClubs.map(e => e.clubObj.id).join(" / ");
+        document.getElementById("kpi-nong12-oldest").innerHTML = `${crestsHtml} <span>${idsText} (${firstEv.ano})</span>`;
+        document.getElementById("kpi-nong12-oldest-foot").textContent = `${firstEv.comp} • Campeão: ${firstEv.campeao}`;
+      }
+    } else {
+      document.getElementById("kpi-nong12-oldest").textContent = "—";
+      document.getElementById("kpi-nong12-oldest-foot").textContent = "Nenhum vice para campeão brasileiro fora do G12";
     }
 
     renderRankingTable(list);
@@ -1006,7 +1065,7 @@
       const tVal = state.mode === "weight" ? c.titlePoints : c.titles;
       const vVal = state.mode === "weight" ? c.points : c.vices;
       const finals = c.titles + c.vices;
-      const saldo = vVal - tVal; // Saldo (V - T): positivo quando tem mais vices que títulos
+      const saldo = vVal - tVal;
       return { ...c, tVal, vVal, saldo, finals };
     });
 
@@ -1097,6 +1156,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        devicePixelRatio: 2,
         layout: {
           padding: { bottom: 26 }
         },
