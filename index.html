@@ -349,7 +349,7 @@
   </nav>
 
   <!-- KPIs GLOBAIS -->
-  <section class="kpi-grid">
+  <section class="kpi-grid" id="global-kpi-grid">
     <div class="kpi-card gold">
       <div class="kpi-label">Líder de Vice-Campeonatos</div>
       <div class="kpi-val" id="kpi-leader">—</div>
@@ -435,7 +435,7 @@
               <th style="text-align:center;">Títulos</th>
               <th style="text-align:center;">Vices</th>
               <th style="text-align:center;">Saldo (T - V)</th>
-              <th style="text-align:center;">Aproveitamento</th>
+              <th style="text-align:center;" title="Percentual de vices sobre o total de decisões (Vices ÷ [Títulos + Vices])">Aprov. de Vices</th>
               <th>Proporção (Títulos vs. Vices)</th>
             </tr>
           </thead>
@@ -792,10 +792,11 @@
         }
       }
 
-      // 2. Contabiliza Título (máximo 1 vez por clube na mesma edição/torneio/liga — corrige 1931, 1970, 1962, 1950, etc.)
+      // 2. Contabiliza Título (máximo 1 vez por clube na mesma edição/torneio/liga — corrige 1931, 1970, 1962, 1950, etc., mas preserva Taça Brasil + Robertão em 1967)
       if (stats[r.campeao]) {
-        // Inclui fonte para preservar 2 títulos legítimos no mesmo ano quando houve duas ligas distintas (ex: 1967 Taça Brasil + Robertão, ou 1916 LPF + APEA)
-        const uniqueEditionTitleKey = `${r.campeao}|${r.ano}|${r.comp}|${r.fonte}`;
+        const obsClean = (r.obs || "").toLowerCase();
+        const isDistinct1967Tournament = obsClean.includes("taça brasil") ? "TB" : obsClean.includes("roberto gomes pedrosa") ? "RGP" : "";
+        const uniqueEditionTitleKey = `${r.campeao}|${r.ano}|${r.comp}|${r.fonte}|${isDistinct1967Tournament}`;
         if (!countedTitles.has(uniqueEditionTitleKey)) {
           countedTitles.add(uniqueEditionTitleKey);
           stats[r.campeao].titles += 1;
@@ -864,6 +865,10 @@
     document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
     document.getElementById("tab-" + tabId).classList.add("active");
     if (btn) btn.classList.add("active");
+    const kpiGrid = document.getElementById("global-kpi-grid");
+    if (kpiGrid) {
+      kpiGrid.style.display = (tabId === "metodologia") ? "none" : "grid";
+    }
     renderAll();
   }
 
@@ -988,7 +993,7 @@
       const tVal = state.mode === "weight" ? c.titlePoints : c.titles;
       const vVal = state.mode === "weight" ? c.points : c.vices;
       const finals = c.titles + c.vices;
-      const rate = finals > 0 ? ((c.titles / finals) * 100) : 0;
+      const rate = finals > 0 ? ((c.vices / finals) * 100) : 0;
       return { ...c, tVal, vVal, saldo: tVal - vVal, rate, finals };
     });
 
