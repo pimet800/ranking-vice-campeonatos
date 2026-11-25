@@ -354,7 +354,7 @@
       <div class="kpi-foot" id="kpi-leader-foot">—</div>
     </div>
     <div class="kpi-card green">
-      <div class="kpi-label">Mais Vices p/ Não-G12 (BR)</div>
+      <div class="kpi-label">Mais Vices para Não-G12 (BR)</div>
       <div class="kpi-val" id="kpi-nong12-leader">—</div>
       <div class="kpi-foot" id="kpi-nong12-leader-foot">—</div>
     </div>
@@ -916,7 +916,7 @@
       document.getElementById("kpi-leader-foot").textContent = "Nenhum vice-campeonato do G12 neste torneio";
     }
 
-    // 2. Card: Mais Vices p/ Campeões de Fora do G12 (BR)
+    // 2. Card: Mais Vices para Campeões de Fora do G12 (BR)
     const nonG12Ranking = Object.values(stats)
       .filter(c => c.nonG12Vices > 0)
       .sort((a, b) => (b.nonG12Vices - a.nonG12Vices) || (b.vices - a.vices));
@@ -926,7 +926,7 @@
       const tiedClubs = nonG12Ranking.filter(c => c.nonG12Vices === topNonG12.nonG12Vices);
       if (tiedClubs.length === 1) {
         document.getElementById("kpi-nong12-leader").innerHTML = `<img src="${topNonG12.crest}" class="crest-img" alt="${topNonG12.nome}"> ${topNonG12.nome}`;
-        document.getElementById("kpi-nong12-leader-foot").textContent = `${topNonG12.nonG12Vices} vice(s) para campeões brasileiros fora do G12`;
+        document.getElementById("kpi-nong12-leader-foot").textContent = `${topNonG12.nonG12Vices} vice(s) para brasileiros fora do G12`;
       } else {
         const crestsHtml = tiedClubs.map(c => `<img src="${c.crest}" class="crest-sm" alt="${c.id}" title="${c.nome}">`).join("");
         const idsText = tiedClubs.map(c => c.id).join(" / ");
