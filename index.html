@@ -179,7 +179,6 @@
     }
     .pos-1 { background: rgba(245,158,11,0.2); color: var(--accent-gold); border: 1px solid rgba(245,158,11,0.4); }
 
-
     .club-cell { display: flex; align-items: center; gap: 0.65rem; font-weight: 700; }
     .crest-img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
     .crest-sm { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
@@ -596,7 +595,14 @@
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; font-size:0.86rem; color:var(--text-muted);">
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
           <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">⚖️ Escala de Façanhas (Modo Ponderado)</strong>
-           • Estadual: <strong>1 pt</strong><br> • Supercopa / Recopa: <strong>2 pts</strong><br> • Copa do Brasil / Sul-Americana: <strong>3 pts</strong><br> • Brasileiro Série A: <strong>4 pts</strong><br> • Libertadores: <strong>5 pts</strong><br> • Mundial de Clubes: <strong>6 pts</strong><br> • Super Mundial de Clubes: <strong>7 pts</strong><br> • Brasileiro Série B: <strong>8 pts</strong>.
+          • Estadual: <strong>1 pt</strong><br>
+          • Supercopa / Recopa: <strong>2 pts</strong><br>
+          • Copa do Brasil / Sul-Americana: <strong>3 pts</strong><br>
+          • Brasileiro Série A: <strong>4 pts</strong><br>
+          • Libertadores: <strong>5 pts</strong><br>
+          • Super Mundial de Clubes: <strong>6 pts</strong><br>
+          • Mundial de Clubes: <strong>7 pts</strong><br>
+          • Brasileiro Série B: <strong>8 pts</strong>
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
           <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">➕ Critério Adicional do Modo Ponderado</strong>
@@ -604,7 +610,7 @@
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
           <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">🛡️ Regra de Títulos e Vices Divididos</strong>
-          Nos anos em que o título ou o vice-campeonato foi dividido entre mais de um clube (ex.: Paulistão 1931 e 1970), cada clube recebe exatamente 1 registro pelo seu feito naquela edição, sem duplicar títulos para o campeão ou vices para o mesmo clube.
+          Nos anos em que o título ou o vice-campeonato foi dividido entre mais de um clube (ex.: Paulistão 1931, 1962, 1970 e 1973), cada clube recebe exatamente 1 registro pelo seu feito naquela edição, sem duplicar títulos para o campeão ou vices para o mesmo clube.
         </div>
       </div>
     </div>
@@ -630,24 +636,34 @@
 
   const CLUB_MAP = Object.fromEntries(CLUBS.map(c => [c.id, c]));
 
-  // Lista de times brasileiros fora do G12 (para aplicar o bônus +1 pt quando um clube do G12 for vice para um brasileiro não-G12)
+  // Lista completa de times brasileiros fora do G12 (incluindo todos os campeões e vices históricos paulistas, gaúchos, cariocas, mineiros e nacionais)
   const NON_G12_BRAZILIAN_CLUBS = new Set([
+    // Nacionais / Outros Estados
     "Bahia", "Fortaleza", "Náutico", "Guarani", "Coritiba", "Bangu", "Sport", "Bragantino",
     "Vitória", "Portuguesa", "São Caetano", "Athletico-PR", "Goiás", "Criciúma", "Ceará",
-    "Juventude", "Brasiliense", "Santo André", "Paulista", "Figueirense", "Novorizontino",
-    "Água Santa", "Ponte Preta", "Audax", "Ituano", "Botafogo-SP", "São José-SP",
-    "Inter de Limeira", "XV de Piracicaba", "Ypiranga-SP", "CA Fiorentino", "Hespanha FC",
-    "CA Albion", "União Guarani FC", "SC Internacional-SP", "Paulistano", "Auto SC",
-    "Germânia", "São Bento-SP", "União da Lapa", "Campos Elíseos", "AA das Palmeiras",
-    "Mackenzie", "Americano-SP", "São Paulo Athletic", "Nova Iguaçu", "Volta Redonda",
-    "Caxias", "Ypiranga", "Brasil de Pelotas", "Lajeadense", "15 de Novembro", "Ulbra",
-    "América-MG", "Tombense", "Caldense", "Ipatinga", "Villa Nova", "Remo", "Sampaio Corrêa",
-    "Campinense", "Londrina", "CSA", "Anapolina", "Campo Grande", "Juventus-SP", "Uberlândia",
-    "Tuna Luso", "Goytacaz", "Paysandu", "Paraná", "União São João", "America-RJ", "Gama",
-    "Santa Cruz", "Chapecoense", "Joinville", "Atlético-GO", "Avaí", "Mirassol"
+    "Juventude", "Brasiliense", "Santo André", "Paulista", "Figueirense", "Villa Nova",
+    "Remo", "Sampaio Corrêa", "Campinense", "Londrina", "CSA", "Anapolina", "Campo Grande",
+    "Uberlândia", "Tuna Luso", "Goytacaz", "Paysandu", "Paraná", "America-RJ", "Gama",
+    "Santa Cruz", "Chapecoense", "Joinville", "Atlético-GO", "Avaí", "Mirassol",
+    // São Paulo (FPF / LFESP / LPF / APEA / LAF)
+    "Novorizontino", "Água Santa", "Ponte Preta", "Audax", "Ituano", "União São João",
+    "Botafogo-SP", "São José-SP", "Inter de Limeira", "XV de Piracicaba", "Ypiranga-SP",
+    "CA Fiorentino", "Hespanha FC", "CA Albion", "União Guarani FC", "SC Internacional-SP",
+    "Paulistano", "Auto SC", "Germânia", "São Bento-SP", "União da Lapa", "Campos Elíseos",
+    "AA das Palmeiras", "Mackenzie", "Americano-SP", "São Paulo Athletic", "Juventus-SP",
+    // Rio de Janeiro (FERJ)
+    "Nova Iguaçu", "Volta Redonda",
+    // Rio Grande do Sul (FGF)
+    "Caxias", "Ypiranga-RS", "Brasil de Pelotas", "Novo Hamburgo", "Lajeadense",
+    "15 de Novembro", "Ulbra", "Esportivo", "Pelotas", "Farroupilha", "Guarany de Bagé",
+    "GE Bagé", "Renner", "Floriano", "Grêmio Santanense", "Riograndense-RG",
+    "Guarani de Cachoeira", "Rio Grande", "São Paulo-RS", "Guarani de Alegrete",
+    "Cruzeiro-RS", "Americano-RS", "Riograndense-SM",
+    // Minas Gerais (FMF)
+    "América-MG", "Tombense", "Caldense", "Ipatinga"
   ]);
 
-  // Lista oficial das 10 competições e seus novos pesos exatos
+  // Lista oficial das 10 competições e seus pesos na Escala de Façanhas (1 a 8)
   const COMPETITIONS = [
     { name: "Campeonato Brasileiro - Série A", short: "Brasileiro A", cat: "NAC", weight: 4 },
     { name: "Campeonato Brasileiro - Série B", short: "Brasileiro B", cat: "NAC", weight: 8 },
@@ -656,8 +672,8 @@
     { name: "Copa Libertadores da América", short: "Libertadores", cat: "INT", weight: 5 },
     { name: "Copa Sul-Americana", short: "Sul-Amer.", cat: "INT", weight: 3 },
     { name: "Recopa Sul-Americana", short: "Recopa", cat: "INT", weight: 2 },
-    { name: "Mundial de Clubes", short: "Mundial", cat: "INT", weight: 6 },
-    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 7 },
+    { name: "Mundial de Clubes", short: "Mundial", cat: "INT", weight: 7 },
+    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 6 },
     { name: "Campeonato Estadual", short: "Estadual", cat: "EST", weight: 1 }
   ];
 
@@ -758,10 +774,8 @@
     records.forEach(r => {
       const compMeta = COMP_MAP[r.comp] || { cat: "NAC", weight: 1 };
 
-      // 1. Contabiliza Vice-Campeonato (máximo 1 vez por clube na mesma edição/torneio)
+      // 1. Contabiliza Vice-Campeonato (máximo 1 vez por clube na mesma edição/torneio/liga)
       if (stats[r.vice]) {
-        const viceKey = `${r.vice}|${r.ano}|${r.comp}|${r.obs || ""}`;
-        // Caso haja duas linhas no mesmo ano por divisão de vice (ex: 1970 PAL e Ponte Preta), cada vice é distinto (PAL != Ponte Preta)
         const uniqueEditionViceKey = `${r.vice}|${r.ano}|${r.comp}|${r.fonte}`;
         if (!countedVices.has(uniqueEditionViceKey)) {
           countedVices.add(uniqueEditionViceKey);
@@ -784,7 +798,7 @@
         }
       }
 
-      // 2. Contabiliza Título (máximo 1 vez por clube na mesma edição/torneio/liga — corrige 1931, 1970, 1962, 1950, etc., mas preserva Taça Brasil + Robertão em 1967)
+      // 2. Contabiliza Título (máximo 1 vez por clube na mesma edição/torneio/liga — preserva Taça Brasil + Robertão em 1967)
       if (stats[r.campeao]) {
         const obsClean = (r.obs || "").toLowerCase();
         const isDistinct1967Tournament = obsClean.includes("taça brasil") ? "TB" : obsClean.includes("roberto gomes pedrosa") ? "RGP" : "";
@@ -882,7 +896,6 @@
     const leader = list[0];
     const leaderVal = state.mode === "weight" ? leader.points : leader.vices;
 
-    // Regra 4: Se nenhum clube do G12 tiver vice-campeonato no recorte (ex: Super Mundial), exibir "—"
     if (leaderVal > 0) {
       document.getElementById("kpi-leader").innerHTML = `<img src="${leader.crest}" class="crest-img" alt="${leader.nome}"> ${leader.nome}`;
       document.getElementById("kpi-leader-foot").textContent = state.mode === "weight"
@@ -923,7 +936,7 @@
       const val = state.mode === "weight" ? c.points : c.vices;
       const isLeader = i === 0 && val > 0;
       const pct = val > 0 ? Math.round((val / maxVal) * 100) : 0;
-      const posClass = val > 0 ? (i === 0 ? "pos-1" : i === 1 ? "pos-2" : i === 2 ? "pos-3" : "") : "";
+      const posClass = isLeader ? "pos-1" : "";
       return `
         <tr class="club-row ${isLeader ? "leader-row" : ""}" onclick="inspectClub('${c.id}')">
           <td><span class="pos-badge ${posClass}">${i + 1}</span></td>
@@ -1000,9 +1013,10 @@
       const winPct = c.finals > 0 ? Math.round((c.titles / c.finals) * 100) : 50;
       const saldoClass = c.saldo > 0 ? "cv-badge-pos" : c.saldo < 0 ? "cv-badge-neg" : "cv-badge-neu";
       const saldoStr = c.saldo > 0 ? `+${c.saldo}` : `${c.saldo}`;
+      const posClass = (i === 0 && c.tVal > 0) ? "pos-1" : "";
       return `
         <tr class="club-row" onclick="inspectClub('${c.id}')">
-          <td><span class="pos-badge ${i < 3 && c.tVal > 0 ? 'pos-' + (i+1) : ''}">${i + 1}</span></td>
+          <td><span class="pos-badge ${posClass}">${i + 1}</span></td>
           <td>
             <div class="club-cell">
               <img src="${c.crest}" class="crest-img" alt="${c.nome}">
@@ -1085,7 +1099,7 @@
       `;
     }).join("");
 
-    // Regra 5: Matriz Cruzada alinhada exatamente à ordem de COMPETITIONS (usando cp.short)
+    // Matriz Cruzada alinhada exatamente à ordem de COMPETITIONS (usando cp.short)
     const matrix = document.getElementById("matrix-table");
     let html = `<thead><tr><th>Clube</th>${COMPETITIONS.map(cp => `<th style="text-align:center;" title="${cp.name}">${cp.short}</th>`).join("")}<th style="text-align:right;">Total</th></tr></thead><tbody>`;
     CLUBS.forEach(c => {
