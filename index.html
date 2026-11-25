@@ -418,8 +418,8 @@
           <div class="panel-sub">Cruza quantas vezes cada clube do G12 foi campeão e vice (sem duplicar títulos divididos)</div>
         </div>
         <div class="segmented">
-          <button id="btn-cv-titles" class="active" onclick="setCvSort('vices')">Ordenar por Vices</button>
-          <button id="btn-cv-vices" onclick="setCvSort('titles')">Ordenar por Títulos</button>
+          <button id="btn-cv-vices" class="active" onclick="setCvSort('vices')">Ordenar por Vices</button>
+          <button id="btn-cv-titles" onclick="setCvSort('titles')">Ordenar por Títulos</button>
           <button id="btn-cv-saldo" onclick="setCvSort('saldo')">Ordenar por Saldo (Vices - Títulos)</button>
         </div>
       </div>
@@ -1045,21 +1045,29 @@
       `;
     }).join("");
 
-    // Plugin para desenhar os escudos dos clubes no eixo X no lugar das siglas
+    // Plugin para desenhar os escudos dos clubes no eixo X com nitidez e proporção preservada
     const xAxisCrestPlugin = {
       id: "xAxisCrestPlugin",
       afterDraw(chart) {
         const { ctx, scales: { x } } = chart;
         if (!x) return;
-        const size = 26;
+        const maxSize = 28;
+        ctx.save();
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+
         list.forEach((club, idx) => {
           const img = CREST_IMG_CACHE[club.id];
           if (img && img.complete && img.naturalWidth > 0) {
-            const xPos = x.getPixelForTick(idx);
-            const yPos = x.top + 8;
-            ctx.drawImage(img, xPos - size / 2, yPos, size, size);
+            const ratio = Math.min(maxSize / img.naturalWidth, maxSize / img.naturalHeight);
+            const drawW = Math.round(img.naturalWidth * ratio);
+            const drawH = Math.round(img.naturalHeight * ratio);
+            const xPos = Math.round(x.getPixelForTick(idx) - drawW / 2);
+            const yPos = Math.round(x.top + 8 + (maxSize - drawH) / 2);
+            ctx.drawImage(img, xPos, yPos, drawW, drawH);
           }
         });
+        ctx.restore();
       }
     };
 
