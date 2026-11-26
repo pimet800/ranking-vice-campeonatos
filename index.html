@@ -340,6 +340,7 @@
   <!-- NAVEGAÇÃO PRINCIPAL -->
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('geral', this)">🏅 Ranking Geral</button>
+    <button class="tab-btn" onclick="switchTab('ranking-campeoes', this)">👑 Maiores Campeões</button>
     <button class="tab-btn" onclick="switchTab('campeoes', this)">⚔️ Campeões vs. Vices</button>
     <button class="tab-btn" onclick="switchTab('clube', this)">🛡️ Histórico do Clube</button>
     <button class="tab-btn" onclick="switchTab('competicoes', this)">📊 Por Competição</button>
@@ -406,6 +407,45 @@
           </div>
         </div>
         <div id="visual-bars-container" class="visual-bars-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA: MAIORES CAMPEÕES -->
+  <section id="tab-ranking-campeoes" class="tab-section">
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Maiores Campeões do G12</div>
+            <div class="panel-sub">Títulos oficiais de primeira prateleira (Série B = 0 no total e no ponderado; sem penalidade não-G12)</div>
+          </div>
+          <span class="status-pill" id="badge-champ-sort-type">Ordenado por: Títulos Totais</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Clube</th>
+                <th>Divisão (NAC / INT / EST)</th>
+                <th>Proporção</th>
+                <th style="text-align:right;" id="th-champ-metric">Títulos</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-champions-ranking"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Comparativo Visual (Campeões)</div>
+            <div class="panel-sub">Escudo oficial ao lado da sigla e barra proporcional</div>
+          </div>
+        </div>
+        <div id="visual-bars-champions" class="visual-bars-list"></div>
       </div>
     </div>
   </section>
@@ -606,7 +646,19 @@
           • Brasileiro Série B: <strong>8 pts</strong>
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
-          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">➕ Critério Adicional do Modo Ponderado</strong>
+          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">👑 Escala de Maiores Campeões (Proposta A)</strong>
+          • Brasileiro Série B: <strong>0 pt</strong> (total e ponderado)<br>
+          • Estadual: <strong>1 pt</strong><br>
+          • Supercopa / Recopa: <strong>2 pts</strong><br>
+          • Copa do Brasil / Sul-Americana: <strong>3 pts</strong><br>
+          • Brasileiro Série A: <strong>4 pts</strong><br>
+          • Libertadores: <strong>5 pts</strong><br>
+          • Mundial de Clubes: <strong>10 pts</strong><br>
+          • Super Mundial de Clubes: <strong>15 pts</strong><br>
+          <span style="font-size:0.78rem;">(Sem bônus ou penalidade por adversário não-G12)</span>
+        </div>
+        <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
+          <strong style="color:var(--text-main); display:block; margin-bottom:0.4rem;">➕ Critério Adicional do Modo Ponderado (Vices)</strong>
           • <strong>+1 ponto adicional</strong> se o clube for vice-campeão para outro time brasileiro que não seja integrante do G12 (ex.: clubes do interior ou de divisões inferiores).
         </div>
         <div style="background:var(--bg-surface); padding:1rem; border-radius:12px;">
@@ -653,7 +705,8 @@
     "Paulistano", "Auto SC", "Germânia", "São Bento-SP", "União da Lapa", "Campos Elíseos",
     "AA das Palmeiras", "Mackenzie", "Americano-SP", "São Paulo Athletic", "Juventus-SP",
     // Rio de Janeiro (FERJ)
-    "Nova Iguaçu", "Volta Redonda", "Madureira", "Americano-RJ", "São Cristóvão", "Andarahy", "Mavilis", "Olaria", "Confiança AC", "Bonsucesso", "Paysandu-RJ", "SC Americano-RJ",
+    "Nova Iguaçu", "Volta Redonda", "Madureira", "Americano-RJ", "São Cristóvão",
+    "Andarahy", "Mavilis", "Olaria", "Confiança AC", "Bonsucesso", "Paysandu-RJ", "SC Americano-RJ",
     // Rio Grande do Sul (FGF)
     "Caxias", "Ypiranga-RS", "Brasil de Pelotas", "Novo Hamburgo", "Lajeadense",
     "15 de Novembro", "Ulbra", "Esportivo", "Pelotas", "Farroupilha", "Guarany de Bagé",
@@ -668,16 +721,16 @@
 
   // Lista oficial das 10 competições e seus pesos na Escala de Façanhas (1 a 8)
   const COMPETITIONS = [
-    { name: "Campeonato Brasileiro - Série A", short: "Brasileiro A", cat: "NAC", weight: 4 },
-    { name: "Campeonato Brasileiro - Série B", short: "Brasileiro B", cat: "NAC", weight: 8 },
-    { name: "Copa do Brasil", short: "Copa BR", cat: "NAC", weight: 3 },
-    { name: "Supercopa do Brasil", short: "Supercopa", cat: "NAC", weight: 2 },
-    { name: "Copa Libertadores da América", short: "Libertadores", cat: "INT", weight: 5 },
-    { name: "Copa Sul-Americana", short: "Sul-Amer.", cat: "INT", weight: 3 },
-    { name: "Recopa Sul-Americana", short: "Recopa", cat: "INT", weight: 2 },
-    { name: "Mundial de Clubes", short: "Mundial", cat: "INT", weight: 7 },
-    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 6 },
-    { name: "Campeonato Estadual", short: "Estadual", cat: "EST", weight: 1 }
+    { name: "Campeonato Brasileiro - Série A", short: "Brasileiro A", cat: "NAC", weight: 4, titleWeight: 4 },
+    { name: "Campeonato Brasileiro - Série B", short: "Brasileiro B", cat: "NAC", weight: 8, titleWeight: 0 },
+    { name: "Copa do Brasil", short: "Copa BR", cat: "NAC", weight: 3, titleWeight: 3 },
+    { name: "Supercopa do Brasil", short: "Supercopa", cat: "NAC", weight: 2, titleWeight: 2 },
+    { name: "Copa Libertadores da América", short: "Libertadores", cat: "INT", weight: 5, titleWeight: 5 },
+    { name: "Copa Sul-Americana", short: "Sul-Amer.", cat: "INT", weight: 3, titleWeight: 3 },
+    { name: "Recopa Sul-Americana", short: "Recopa", cat: "INT", weight: 2, titleWeight: 2 },
+    { name: "Mundial de Clubes", short: "Mundial", cat: "INT", weight: 7, titleWeight: 10 },
+    { name: "Super Mundial de Clubes", short: "Super Mund.", cat: "INT", weight: 6, titleWeight: 15 },
+    { name: "Campeonato Estadual", short: "Estadual", cat: "EST", weight: 1, titleWeight: 1 }
   ];
 
   const COMP_MAP = Object.fromEntries(COMPETITIONS.map(c => [c.name, c]));
@@ -763,6 +816,9 @@
         points: 0,
         titles: 0,
         titlePoints: 0,
+        tNac: 0,
+        tInt: 0,
+        tEst: 0,
         nac: 0,
         int: 0,
         est: 0,
@@ -818,14 +874,19 @@
       }
 
       // 2. Contabiliza Título (máximo 1 vez por clube na mesma edição/torneio/liga — preserva Taça Brasil + Robertão em 1967)
-      if (stats[r.campeao]) {
+      // Regra Proposta A: Série B vale 0 tanto no total quanto no ponderado; demais torneios usam titleWeight (sem bônus/penalidade não-G12)
+      if (stats[r.campeao] && compMeta.titleWeight > 0) {
         const obsClean = (r.obs || "").toLowerCase();
         const isDistinct1967Tournament = obsClean.includes("taça brasil") ? "TB" : obsClean.includes("roberto gomes pedrosa") ? "RGP" : "";
         const uniqueEditionTitleKey = `${r.campeao}|${r.ano}|${r.comp}|${r.fonte}|${isDistinct1967Tournament}`;
         if (!countedTitles.has(uniqueEditionTitleKey)) {
           countedTitles.add(uniqueEditionTitleKey);
-          stats[r.campeao].titles += 1;
-          stats[r.campeao].titlePoints += compMeta.weight;
+          const sc = stats[r.campeao];
+          sc.titles += 1;
+          sc.titlePoints += compMeta.titleWeight;
+          if (compMeta.cat === "NAC") sc.tNac += 1;
+          if (compMeta.cat === "INT") sc.tInt += 1;
+          if (compMeta.cat === "EST") sc.tEst += 1;
         }
       }
     });
@@ -869,6 +930,10 @@
       ? "Ordenado por: Vices Totais"
       : "Ordenado por: Pontuação Ponderada";
     document.getElementById("th-metric").textContent = m === "quant" ? "Vices" : "Pontos (Vices)";
+    document.getElementById("badge-champ-sort-type").textContent = m === "quant"
+      ? "Ordenado por: Títulos Totais"
+      : "Ordenado por: Pontuação Ponderada (Proposta A)";
+    document.getElementById("th-champ-metric").textContent = m === "quant" ? "Títulos" : "Pontos (Títulos)";
     renderAll();
   }
 
@@ -1037,6 +1102,7 @@
 
     renderRankingTable(list);
     renderVisualBars(list);
+    renderChampionsRanking(stats);
     renderCampeoesVsVices();
     renderCompetitions();
     renderClubHistory();
@@ -1092,6 +1158,74 @@
     const container = document.getElementById("visual-bars-container");
     container.innerHTML = list.map((c) => {
       const val = state.mode === "weight" ? c.points : c.vices;
+      const pct = val > 0 ? Math.max(Math.round((val / maxVal) * 100), 2) : 0;
+      const isLeader = val > 0 && val === topVal;
+      return `
+        <div class="vbar-item ${isLeader ? 'is-leader' : ''}" onclick="inspectClub('${c.id}')" title="${c.nome}: ${val}">
+          <div class="vbar-club">
+            <img src="${c.crest}" class="crest-sm" alt="${c.id}">
+            <span>${c.id}</span>
+          </div>
+          <div class="vbar-track">
+            <div class="vbar-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="vbar-val">${val}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Aba: Maiores Campeões (Proposta A: Série B = 0, Estadual = 1, Supercopa/Recopa = 2, Copa BR/Sul-Am = 3, Série A = 4, Lib = 5, Mundial = 10, Super Mundial = 15)
+  function renderChampionsRanking(stats) {
+    const isWeight = state.mode === "weight";
+    const champList = Object.values(stats).sort((a, b) => {
+      if (isWeight) return (b.titlePoints - a.titlePoints) || (b.titles - a.titles);
+      return (b.titles - a.titles) || (b.titlePoints - a.titlePoints);
+    });
+
+    const maxVal = Math.max(...champList.map(c => isWeight ? c.titlePoints : c.titles), 1);
+    const topVal = champList.length > 0 ? (isWeight ? champList[0].titlePoints : champList[0].titles) : 0;
+
+    const tbody = document.getElementById("tbody-champions-ranking");
+    tbody.innerHTML = champList.map((c, i) => {
+      const val = isWeight ? c.titlePoints : c.titles;
+      const isLeader = val > 0 && val === topVal;
+      const pct = val > 0 ? Math.round((val / maxVal) * 100) : 0;
+      const posClass = isLeader ? "pos-1" : "";
+      const displayRank = isLeader ? 1 : (i + 1);
+      return `
+        <tr class="club-row ${isLeader ? "leader-row" : ""}" onclick="inspectClub('${c.id}')">
+          <td><span class="pos-badge ${posClass}">${displayRank}</span></td>
+          <td>
+            <div class="club-cell">
+              <img src="${c.crest}" class="crest-img" alt="${c.nome}">
+              <div>
+                <div>${c.nome}</div>
+                <div style="font-size:0.72rem; color:var(--text-muted); font-weight:500;">${c.id} • ${c.estado}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="split-pills">
+              <span class="sp-tag" title="Títulos Nacionais">N: ${c.tNac}</span>
+              <span class="sp-tag" title="Títulos Internacionais">I: ${c.tInt}</span>
+              <span class="sp-tag" title="Títulos Estaduais">E: ${c.tEst}</span>
+            </div>
+          </td>
+          <td>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </td>
+          <td style="text-align:right;">
+            <span class="score-num">${val}</span>
+            ${isWeight ? `<div style="font-size:0.7rem; color:var(--text-muted);">${c.titles} títulos</div>` : ""}
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    const barsContainer = document.getElementById("visual-bars-champions");
+    barsContainer.innerHTML = champList.map((c) => {
+      const val = isWeight ? c.titlePoints : c.titles;
       const pct = val > 0 ? Math.max(Math.round((val / maxVal) * 100), 2) : 0;
       const isLeader = val > 0 && val === topVal;
       return `
