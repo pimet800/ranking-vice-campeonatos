@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -1396,7 +1396,7 @@
     });
 
     // Gráfico por década
-    const decades = ["1910s", "1920s", "1930s", "1940s", "1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"];
+    const decades = ["1900s", "1910s", "1920s", "1930s", "1940s", "1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"];
     const decCounts = decades.map(d => {
       const start = parseInt(d);
       return s.records.filter(r => r.ano >= start && r.ano < start + 10).length;
