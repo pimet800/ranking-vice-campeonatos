@@ -108,6 +108,7 @@ window.REGISTROS_OFICIAIS = [
   { ano: 1959, comp: "Campeonato Brasileiro - Série A", campeao: "Bahia", vice: "SAN", fonte: "CBF", obs: "Taça Brasil 1959" },
 
   // ================= CAMPEONATO BRASILEIRO - SÉRIE B =================
+  { ano: 2026, comp: "Campeonato Brasileiro - Série B", campeao: "Novorizontino", vice: "Juventude", fonte: "CBF", obs: "" },
   { ano: 2025, comp: "Campeonato Brasileiro - Série B", campeao: "Coritiba", vice: "Athletico-PR", fonte: "CBF", obs: "" },
   { ano: 2024, comp: "Campeonato Brasileiro - Série B", campeao: "SAN", vice: "Mirassol", fonte: "CBF", obs: "" },
   { ano: 2023, comp: "Campeonato Brasileiro - Série B", campeao: "Vitória", vice: "Juventude", fonte: "CBF", obs: "" },
@@ -305,7 +306,6 @@ window.REGISTROS_OFICIAIS = [
 
   // ================= CAMPEONATOS ESTADUAIS =================
   // --- Campeonato Paulista (FPF / LFESP / LPF / APEA / LAF) ---
-// --- Campeonato Paulista (FPF / LFESP / LPF / APEA / LAF) ---
   { ano: 2026, comp: "Campeonato Estadual", campeao: "PAL", vice: "Novorizontino", fonte: "FPF", obs: "Paulistão 2026 (Grêmio Novorizontino SAF)" },
   { ano: 2025, comp: "Campeonato Estadual", campeao: "COR", vice: "PAL", fonte: "FPF", obs: "Paulistão 2025" },
   { ano: 2024, comp: "Campeonato Estadual", campeao: "PAL", vice: "SAN", fonte: "FPF", obs: "Paulistão 2024" },
