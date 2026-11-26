@@ -1128,13 +1128,20 @@
     });
 
     list.sort((a, b) => {
-      if (state.cvSort === "vices") return (b.vVal - a.vVal) || (b.saldo - a.saldo);
-      if (state.cvSort === "saldo") return (b.saldo - a.saldo) || (b.vVal - a.vVal);
+      if (state.cvSort === "vices") return (b.vVal - a.vVal) || (a.tVal - b.tVal);
+      if (state.cvSort === "saldo") return (b.saldo - a.saldo) || (b.vVal - a.vVal) || (a.tVal - b.tVal);
       return (b.tVal - a.tVal) || (b.vVal - a.vVal);
     });
 
+    const isSameCvRank = (a, b) => {
+      if (state.cvSort === "vices") return a.vVal === b.vVal && a.tVal === b.tVal;
+      if (state.cvSort === "saldo") return a.saldo === b.saldo && a.vVal === b.vVal && a.tVal === b.tVal;
+      return a.tVal === b.tVal && a.vVal === b.vVal;
+    };
+
     const getSortMetric = (c) => state.cvSort === "vices" ? c.vVal : state.cvSort === "saldo" ? c.saldo : c.tVal;
-    const topMetric = list.length > 0 ? getSortMetric(list[0]) : 0;
+    const topClub = list.length > 0 ? list[0] : null;
+    const topMetric = topClub ? getSortMetric(topClub) : 0;
 
     const tbody = document.getElementById("tbody-cv");
     tbody.innerHTML = list.map((c, i) => {
@@ -1142,7 +1149,7 @@
       const saldoClass = c.saldo > 0 ? "cv-badge-pos" : c.saldo < 0 ? "cv-badge-neg" : "cv-badge-neu";
       const saldoStr = c.saldo > 0 ? `+${c.saldo}` : `${c.saldo}`;
       const curMetric = getSortMetric(c);
-      const isLeader = curMetric > 0 && curMetric === topMetric;
+      const isLeader = curMetric > 0 && topClub && isSameCvRank(c, topClub);
       const posClass = isLeader ? "pos-1" : "";
       const displayRank = isLeader ? 1 : (i + 1);
       return `
