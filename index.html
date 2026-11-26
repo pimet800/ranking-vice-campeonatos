@@ -141,7 +141,7 @@
     .kpi-card.blue::before { background: var(--accent-blue); }
     .kpi-card.purple::before { background: var(--accent-purple); }
     .kpi-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 700; }
-    .kpi-val { font-size: 1.45rem; font-weight: 800; margin: 0.35rem 0 0.2rem; display: flex; align-items: center; gap: 0.6rem; min-height: 32px; }
+    .kpi-val { font-size: 1.35rem; font-weight: 800; margin: 0.35rem 0 0.2rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem; min-height: 32px; }
     .kpi-foot { font-size: 0.78rem; color: var(--text-muted); }
 
     /* PANELS */
@@ -255,7 +255,7 @@
     .comp-card h4 { font-size: 0.95rem; margin-bottom: 0.2rem; display: flex; justify-content: space-between; align-items: center; }
     .weight-tag { font-size: 0.7rem; background: rgba(59,130,246,0.15); color: #60a5fa; padding: 2px 7px; border-radius: 6px; white-space: nowrap; display: inline-block; }
     .bonus-tag { font-size: 0.68rem; background: rgba(245,158,11,0.16); color: var(--accent-gold); padding: 2px 6px; border-radius: 5px; margin-left: 4px; white-space: nowrap; display: inline-block; }
-    .col-points { min-width: 195px; white-space: nowrap; }
+    .col-points { min-width: 215px; white-space: nowrap; }
     .mini-list { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.45rem; }
     .mini-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.83rem; padding: 4px 6px; border-radius: 6px; background: rgba(255,255,255,0.02); }
 
@@ -355,7 +355,7 @@
       <div class="kpi-foot" id="kpi-leader-foot">—</div>
     </div>
     <div class="kpi-card green">
-      <div class="kpi-label">Mais Vices para Não-G12 (BR)</div>
+      <div class="kpi-label">Mais Vices p/ Não-G12 (BR)</div>
       <div class="kpi-val" id="kpi-nong12-leader">—</div>
       <div class="kpi-foot" id="kpi-nong12-leader-foot">—</div>
     </div>
@@ -462,9 +462,10 @@
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">Matriz Cruzada: Clubes × Competições (Vice-Campeonatos)</div>
-          <div class="panel-sub">Detalhamento quantitativo exato em todas as 10 competições elegíveis</div>
+          <div class="panel-title" id="matrix-panel-title">Matriz Cruzada: Clubes × Competições (Vice-Campeonatos)</div>
+          <div class="panel-sub" id="matrix-panel-sub">Panorama histórico completo de todos os 12 clubes em todas as 10 competições elegíveis</div>
         </div>
+        <span class="status-pill" id="matrix-mode-pill">Modo: Quantitativo (Vices)</span>
       </div>
       <div class="table-wrap">
         <table id="matrix-table"></table>
@@ -690,7 +691,7 @@
 
   let charts = {};
 
-  function getRecords() {
+  function getExpandedRecords() {
     const raw = window.REGISTROS_OFICIAIS || [];
     const expanded = [];
 
@@ -730,9 +731,11 @@
       expanded.push({ ...r, comp: compName });
     });
 
-    return expanded
-      .map((r, idx) => ({ ...r, id: idx + 1 }))
-      .filter(r => state.compFilter === "ALL" || r.comp === state.compFilter);
+    return expanded.map((r, idx) => ({ ...r, id: idx + 1 }));
+  }
+
+  function getRecords() {
+    return getExpandedRecords().filter(r => state.compFilter === "ALL" || r.comp === state.compFilter);
   }
 
   function calculateVicePoints(r, baseWeight) {
@@ -748,8 +751,7 @@
     return { pts, bonuses };
   }
 
-  function computeStats() {
-    const records = getRecords();
+  function computeStatsFromRecords(recordList) {
     const stats = {};
     CLUBS.forEach(c => {
       stats[c.id] = {
@@ -763,9 +765,13 @@
         int: 0,
         est: 0,
         byComp: {},
+        byCompPoints: {},
         records: []
       };
-      COMPETITIONS.forEach(cp => { stats[c.id].byComp[cp.name] = 0; });
+      COMPETITIONS.forEach(cp => {
+        stats[c.id].byComp[cp.name] = 0;
+        stats[c.id].byCompPoints[cp.name] = 0;
+      });
     });
 
     // Rastreadores de unicidade para evitar dupla contagem em títulos ou vices divididos no mesmo ano/torneio
@@ -773,7 +779,7 @@
     const countedVices = new Set();
     const allNonG12ViceEvents = [];
 
-    records.forEach(r => {
+    recordList.forEach(r => {
       const compMeta = COMP_MAP[r.comp] || { cat: "NAC", weight: 1 };
 
       // 1. Contabiliza Vice-Campeonato (máximo 1 vez por clube na mesma edição/torneio/liga)
@@ -798,6 +804,7 @@
           if (compMeta.cat === "INT") s.int += 1;
           if (compMeta.cat === "EST") s.est += 1;
           s.byComp[r.comp] = (s.byComp[r.comp] || 0) + 1;
+          s.byCompPoints[r.comp] = (s.byCompPoints[r.comp] || 0) + pts;
           s.records.push({
             ...r,
             baseWeight: compMeta.weight,
@@ -821,7 +828,15 @@
       }
     });
 
-    return { records, stats, allNonG12ViceEvents };
+    return { records: recordList, stats, allNonG12ViceEvents };
+  }
+
+  function computeStats() {
+    return computeStatsFromRecords(getRecords());
+  }
+
+  function computeAllCompetitionsStats() {
+    return computeStatsFromRecords(getExpandedRecords());
   }
 
   function init() {
@@ -904,20 +919,32 @@
     // Atualiza barra de status
     document.getElementById("lbl-total-records").textContent = records.length;
 
-    // 1. Card: Líder de Vice-Campeonatos
-    const leader = list[0];
-    const leaderVal = state.mode === "weight" ? leader.points : leader.vices;
+    // 1. Card: Líder de Vice-Campeonatos (exibe todos os empatados em 1º lugar!)
+    const leaderVal = state.mode === "weight" ? list[0].points : list[0].vices;
     if (leaderVal > 0) {
-      document.getElementById("kpi-leader").innerHTML = `<img src="${leader.crest}" class="crest-img" alt="${leader.nome}"> ${leader.nome}`;
-      document.getElementById("kpi-leader-foot").textContent = state.mode === "weight"
-        ? `${leader.points} pontos ponderados (${leader.vices} vices)`
-        : `${leader.vices} vice-campeonatos oficiais (${leader.points} pts)`;
+      const tiedLeaders = list.filter(c => (state.mode === "weight" ? c.points : c.vices) === leaderVal);
+      if (tiedLeaders.length === 1) {
+        const leader = tiedLeaders[0];
+        document.getElementById("kpi-leader").innerHTML = `<img src="${leader.crest}" class="crest-img" alt="${leader.nome}"> ${leader.nome}`;
+        document.getElementById("kpi-leader-foot").textContent = state.mode === "weight"
+          ? `${leader.points} pontos ponderados (${leader.vices} vices)`
+          : `${leader.vices} vice-campeonatos oficiais (${leader.points} pts)`;
+      } else {
+        const crestsHtml = tiedLeaders.map(c => `<img src="${c.crest}" class="crest-sm" alt="${c.id}" title="${c.nome}">`).join("");
+        const namesText = tiedLeaders.length <= 3
+          ? tiedLeaders.map(c => c.nome).join(" / ")
+          : tiedLeaders.map(c => c.id).join(" / ");
+        document.getElementById("kpi-leader").innerHTML = `${crestsHtml} <span style="font-size:${tiedLeaders.length > 2 ? '1.05rem' : '1.2rem'};">${namesText}</span>`;
+        document.getElementById("kpi-leader-foot").textContent = state.mode === "weight"
+          ? `Empate na liderança com ${leaderVal} pts cada`
+          : `Empate na liderança com ${leaderVal} vice(s) cada`;
+      }
     } else {
       document.getElementById("kpi-leader").textContent = "—";
       document.getElementById("kpi-leader-foot").textContent = "Nenhum vice-campeonato do G12 neste torneio";
     }
 
-    // 2. Card: Mais Vices para Campeões de Fora do G12 (BR)
+    // 2. Card: Mais Vices p/ Campeões de Fora do G12 (BR)
     const nonG12Ranking = Object.values(stats)
       .filter(c => c.nonG12Vices > 0)
       .sort((a, b) => (b.nonG12Vices - a.nonG12Vices) || (b.vices - a.vices));
@@ -927,11 +954,13 @@
       const tiedClubs = nonG12Ranking.filter(c => c.nonG12Vices === topNonG12.nonG12Vices);
       if (tiedClubs.length === 1) {
         document.getElementById("kpi-nong12-leader").innerHTML = `<img src="${topNonG12.crest}" class="crest-img" alt="${topNonG12.nome}"> ${topNonG12.nome}`;
-        document.getElementById("kpi-nong12-leader-foot").textContent = `${topNonG12.nonG12Vices} vice(s) para brasileiros fora do G12`;
+        document.getElementById("kpi-nong12-leader-foot").textContent = `${topNonG12.nonG12Vices} vice(s) para campeões brasileiros fora do G12`;
       } else {
         const crestsHtml = tiedClubs.map(c => `<img src="${c.crest}" class="crest-sm" alt="${c.id}" title="${c.nome}">`).join("");
-        const idsText = tiedClubs.map(c => c.id).join(" / ");
-        document.getElementById("kpi-nong12-leader").innerHTML = `${crestsHtml} <span style="font-size:1.15rem;">${idsText}</span>`;
+        const namesText = tiedClubs.length <= 3
+          ? tiedClubs.map(c => c.nome).join(" / ")
+          : tiedClubs.map(c => c.id).join(" / ");
+        document.getElementById("kpi-nong12-leader").innerHTML = `${crestsHtml} <span style="font-size:${tiedClubs.length > 2 ? '1.05rem' : '1.15rem'};">${namesText}</span>`;
         document.getElementById("kpi-nong12-leader-foot").textContent = `Empate com ${topNonG12.nonG12Vices} vice(s) cada para não-G12 (BR)`;
       }
     } else {
@@ -939,13 +968,37 @@
       document.getElementById("kpi-nong12-leader-foot").textContent = "Nenhum vice para campeão brasileiro fora do G12";
     }
 
-    // 3. Card: Vice Mais Recente (trocado de posição com o 4º card)
+    // 3. Card: Vice Mais Recente (exibe todos os clubes empatados no ano mais recente do recorte!)
     const g12Vices = records.filter(r => CLUB_MAP[r.vice]).sort((a, b) => b.ano - a.ano);
     if (g12Vices.length > 0) {
-      const rec = g12Vices[0];
-      const cObj = CLUB_MAP[rec.vice];
-      document.getElementById("kpi-recent").innerHTML = `<img src="${cObj.crest}" class="crest-sm" alt="${cObj.nome}"> ${cObj.nome} (${rec.ano})`;
-      document.getElementById("kpi-recent-foot").textContent = `${rec.comp} • Campeão: ${CLUB_MAP[rec.campeao]?.nome || rec.campeao}`;
+      const latestYear = g12Vices[0].ano;
+      const sameYearLatest = g12Vices.filter(r => r.ano === latestYear);
+      const uniqueRecentClubs = [];
+      const seenRecentIds = new Set();
+      sameYearLatest.forEach(r => {
+        if (!seenRecentIds.has(r.vice)) {
+          seenRecentIds.add(r.vice);
+          uniqueRecentClubs.push(r);
+        }
+      });
+
+      if (uniqueRecentClubs.length === 1) {
+        const rec = uniqueRecentClubs[0];
+        const cObj = CLUB_MAP[rec.vice];
+        document.getElementById("kpi-recent").innerHTML = `<img src="${cObj.crest}" class="crest-sm" alt="${cObj.nome}"> ${cObj.nome} (${rec.ano})`;
+        document.getElementById("kpi-recent-foot").textContent = `${rec.comp} • Campeão: ${CLUB_MAP[rec.campeao]?.nome || rec.campeao}`;
+      } else {
+        const crestsHtml = uniqueRecentClubs.map(r => {
+          const cObj = CLUB_MAP[r.vice];
+          return `<img src="${cObj.crest}" class="crest-sm" alt="${cObj.id}" title="${cObj.nome}">`;
+        }).join("");
+        const namesText = uniqueRecentClubs.length <= 2
+          ? uniqueRecentClubs.map(r => CLUB_MAP[r.vice].nome).join(" / ")
+          : uniqueRecentClubs.map(r => r.vice).join(" / ");
+        document.getElementById("kpi-recent").innerHTML = `${crestsHtml} <span style="font-size:1.05rem;">${namesText} (${latestYear})</span>`;
+        const uniqueComps = [...new Set(sameYearLatest.map(r => r.comp))].join(", ");
+        document.getElementById("kpi-recent-foot").textContent = `${uniqueComps} (${latestYear})`;
+      }
     } else {
       document.getElementById("kpi-recent").textContent = "—";
       document.getElementById("kpi-recent-foot").textContent = "Sem registros do G12 no filtro";
@@ -983,22 +1036,25 @@
     renderRankingTable(list);
     renderVisualBars(list);
     renderCampeoesVsVices();
-    renderCompetitions(records, stats);
+    renderCompetitions();
     renderClubHistory();
     renderEvolution(records, stats);
   }
 
   function renderRankingTable(list) {
     const maxVal = Math.max(...list.map(c => state.mode === "weight" ? c.points : c.vices), 1);
+    const topVal = list.length > 0 ? (state.mode === "weight" ? list[0].points : list[0].vices) : 0;
     const tbody = document.getElementById("tbody-ranking");
     tbody.innerHTML = list.map((c, i) => {
       const val = state.mode === "weight" ? c.points : c.vices;
-      const isLeader = i === 0 && val > 0;
+      // Todos empatados na 1ª colocação (com pontuação > 0) recebem destaque dourado!
+      const isLeader = val > 0 && val === topVal;
       const pct = val > 0 ? Math.round((val / maxVal) * 100) : 0;
       const posClass = isLeader ? "pos-1" : "";
+      const displayRank = isLeader ? 1 : (i + 1);
       return `
         <tr class="club-row ${isLeader ? "leader-row" : ""}" onclick="inspectClub('${c.id}')">
-          <td><span class="pos-badge ${posClass}">${i + 1}</span></td>
+          <td><span class="pos-badge ${posClass}">${displayRank}</span></td>
           <td>
             <div class="club-cell">
               <img src="${c.crest}" class="crest-img" alt="${c.nome}">
@@ -1030,11 +1086,12 @@
   // Comparativo Visual com Escudo do Time em Frente à Sigla
   function renderVisualBars(list) {
     const maxVal = Math.max(...list.map(c => state.mode === "weight" ? c.points : c.vices), 1);
+    const topVal = list.length > 0 ? (state.mode === "weight" ? list[0].points : list[0].vices) : 0;
     const container = document.getElementById("visual-bars-container");
-    container.innerHTML = list.map((c, i) => {
+    container.innerHTML = list.map((c) => {
       const val = state.mode === "weight" ? c.points : c.vices;
       const pct = val > 0 ? Math.max(Math.round((val / maxVal) * 100), 2) : 0;
-      const isLeader = i === 0 && val > 0;
+      const isLeader = val > 0 && val === topVal;
       return `
         <div class="vbar-item ${isLeader ? 'is-leader' : ''}" onclick="inspectClub('${c.id}')" title="${c.nome}: ${val}">
           <div class="vbar-club">
@@ -1076,16 +1133,21 @@
       return (b.tVal - a.tVal) || (b.vVal - a.vVal);
     });
 
+    const getSortMetric = (c) => state.cvSort === "vices" ? c.vVal : state.cvSort === "saldo" ? c.saldo : c.tVal;
+    const topMetric = list.length > 0 ? getSortMetric(list[0]) : 0;
+
     const tbody = document.getElementById("tbody-cv");
     tbody.innerHTML = list.map((c, i) => {
       const winPct = c.finals > 0 ? Math.round((c.titles / c.finals) * 100) : 50;
       const saldoClass = c.saldo > 0 ? "cv-badge-pos" : c.saldo < 0 ? "cv-badge-neg" : "cv-badge-neu";
       const saldoStr = c.saldo > 0 ? `+${c.saldo}` : `${c.saldo}`;
-      const isLeader = i === 0 && (state.cvSort === "vices" ? c.vVal > 0 : state.cvSort === "saldo" ? c.saldo > 0 : c.tVal > 0);
+      const curMetric = getSortMetric(c);
+      const isLeader = curMetric > 0 && curMetric === topMetric;
       const posClass = isLeader ? "pos-1" : "";
+      const displayRank = isLeader ? 1 : (i + 1);
       return `
-        <tr class="club-row" onclick="inspectClub('${c.id}')">
-          <td><span class="pos-badge ${posClass}">${i + 1}</span></td>
+        <tr class="club-row ${isLeader ? "leader-row" : ""}" onclick="inspectClub('${c.id}')">
+          <td><span class="pos-badge ${posClass}">${displayRank}</span></td>
           <td>
             <div class="club-cell">
               <img src="${c.crest}" class="crest-img" alt="${c.nome}">
@@ -1181,47 +1243,85 @@
     });
   }
 
-  function renderCompetitions(records, stats) {
+  function renderCompetitions() {
+    // Sempre exibe TODOS os vices (ou pontos ponderados) de TODOS os times em TODAS as 10 competições,
+    // independentemente do filtro de competição ativo no seletor superior!
+    const { stats: fullStats } = computeAllCompetitionsStats();
+    const isWeight = state.mode === "weight";
+
     const container = document.getElementById("comp-cards-container");
     container.innerHTML = COMPETITIONS.map(cp => {
       const ranking = CLUBS.map(c => ({
         ...c,
-        count: stats[c.id].byComp[cp.name] || 0
-      })).filter(c => c.count > 0).sort((a, b) => b.count - a.count).slice(0, 4);
+        val: isWeight ? (fullStats[c.id].byCompPoints[cp.name] || 0) : (fullStats[c.id].byComp[cp.name] || 0),
+        vicesCount: fullStats[c.id].byComp[cp.name] || 0
+      })).filter(c => c.val > 0).sort((a, b) => (b.val - a.val) || (b.vicesCount - a.vicesCount)).slice(0, 4);
 
+      const topVal = ranking.length > 0 ? ranking[0].val : 0;
       const rowsHtml = ranking.length
-        ? ranking.map(r => `
-            <div class="mini-row">
-              <span style="display:flex; align-items:center; gap:6px; font-weight:600;">
-                <img src="${r.crest}" class="crest-sm" alt="${r.id}"> ${r.nome}
-              </span>
-              <strong>${r.count}</strong>
-            </div>
-          `).join("")
+        ? ranking.map(r => {
+            const isTop = r.val === topVal;
+            return `
+              <div class="mini-row" style="${isTop ? 'background:rgba(245,158,11,0.1);' : ''}">
+                <span style="display:flex; align-items:center; gap:6px; font-weight:600; ${isTop ? 'color:var(--accent-gold);' : ''}">
+                  <img src="${r.crest}" class="crest-sm" alt="${r.id}"> ${r.nome}
+                </span>
+                <strong style="${isTop ? 'color:var(--accent-gold);' : ''}">${r.val}${isWeight ? ' pts' : ''}</strong>
+              </div>
+            `;
+          }).join("")
         : `<div style="font-size:0.8rem; color:var(--text-muted); padding:0.5rem 0;">Nenhum vice registrado para o G12</div>`;
 
       return `
         <div class="comp-card">
           <h4>${cp.name} <span class="weight-tag">Peso ${cp.weight}</span></h4>
-          <div style="font-size:0.75rem; color:var(--text-muted);">Top vice-campeões do G12</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">Top ${isWeight ? 'pontuadores (vices)' : 'vice-campeões'} do G12</div>
           <div class="mini-list">${rowsHtml}</div>
         </div>
       `;
     }).join("");
 
-    // Matriz Cruzada alinhada exatamente à ordem de COMPETITIONS (usando cp.short)
+    // Atualiza cabeçalho da Matriz Cruzada conforme o modo Quantitativo ou Ponderado
+    document.getElementById("matrix-panel-title").textContent = isWeight
+      ? "Matriz Cruzada: Clubes × Competições (Pontuação Ponderada de Vices)"
+      : "Matriz Cruzada: Clubes × Competições (Vice-Campeonatos)";
+    document.getElementById("matrix-panel-sub").textContent = isWeight
+      ? "Pontuação ponderada completa (peso base + bônus não-G12) de todos os 12 clubes em todas as 10 competições"
+      : "Detalhamento quantitativo completo de todos os 12 clubes em todas as 10 competições elegíveis";
+    document.getElementById("matrix-mode-pill").textContent = isWeight
+      ? "Modo: Ponderado (Pesos + Bônus)"
+      : "Modo: Quantitativo (Vices)";
+
+    // Calcula máximos por coluna para destacar empatados em 1º em dourado na matriz
+    const colMax = {};
+    COMPETITIONS.forEach(cp => {
+      colMax[cp.name] = Math.max(...CLUBS.map(c => isWeight ? (fullStats[c.id].byCompPoints[cp.name] || 0) : (fullStats[c.id].byComp[cp.name] || 0)), 0);
+    });
+
+    const sortedClubs = [...CLUBS].sort((a, b) => {
+      const totA = isWeight ? fullStats[a.id].points : fullStats[a.id].vices;
+      const totB = isWeight ? fullStats[b.id].points : fullStats[b.id].vices;
+      return (totB - totA) || (fullStats[b.id].vices - fullStats[a.id].vices);
+    });
+    const maxRowTotal = sortedClubs.length > 0 ? (isWeight ? fullStats[sortedClubs[0].id].points : fullStats[sortedClubs[0].id].vices) : 0;
+
+    // Matriz Cruzada completa com todos os 12 clubes e todas as 10 competições
     const matrix = document.getElementById("matrix-table");
-    let html = `<thead><tr><th>Clube</th>${COMPETITIONS.map(cp => `<th style="text-align:center;" title="${cp.name}">${cp.short}</th>`).join("")}<th style="text-align:right;">Total</th></tr></thead><tbody>`;
-    CLUBS.forEach(c => {
-      const s = stats[c.id];
-      const rowTotal = COMPETITIONS.reduce((acc, cp) => acc + (s.byComp[cp.name] || 0), 0);
-      html += `<tr class="club-row" onclick="inspectClub('${c.id}')">
+    let html = `<thead><tr><th>Clube</th>${COMPETITIONS.map(cp => `<th style="text-align:center;" title="${cp.name} (Peso ${cp.weight})">${cp.short}</th>`).join("")}<th style="text-align:right;">Total</th></tr></thead><tbody>`;
+    sortedClubs.forEach(c => {
+      const s = fullStats[c.id];
+      const rowTotal = COMPETITIONS.reduce((acc, cp) => acc + (isWeight ? (s.byCompPoints[cp.name] || 0) : (s.byComp[cp.name] || 0)), 0);
+      const isRowLeader = rowTotal > 0 && rowTotal === maxRowTotal;
+      html += `<tr class="club-row ${isRowLeader ? 'leader-row' : ''}" onclick="inspectClub('${c.id}')">
         <td><div class="club-cell"><img src="${c.crest}" class="crest-sm" alt="${c.id}"> ${c.id}</div></td>
         ${COMPETITIONS.map(cp => {
-          const val = s.byComp[cp.name] || 0;
-          return `<td style="text-align:center; color:${val ? 'var(--text-main)' : 'var(--text-muted)'}; font-weight:${val ? '700' : '400'};">${val}</td>`;
+          const val = isWeight ? (s.byCompPoints[cp.name] || 0) : (s.byComp[cp.name] || 0);
+          const isColTop = val > 0 && val === colMax[cp.name];
+          const colorStyle = isColTop ? 'var(--accent-gold)' : val ? 'var(--text-main)' : 'var(--text-muted)';
+          const weightStyle = (isColTop || val) ? '800' : '400';
+          return `<td style="text-align:center; color:${colorStyle}; font-weight:${weightStyle};">${val}</td>`;
         }).join("")}
-        <td style="text-align:right; font-weight:800; color:var(--accent-green);">${rowTotal}</td>
+        <td style="text-align:right; font-weight:800; color:${isRowLeader ? 'var(--accent-gold)' : 'var(--accent-green)'};">${rowTotal}</td>
       </tr>`;
     });
     html += "</tbody>";
@@ -1330,7 +1430,7 @@
           <td><strong>${r.ano}</strong></td>
           <td>${r.comp}</td>
           <td>${champLabel}</td>
-          <td><span class="weight-tag">${r.weight} pt(s)</span>${bonusHtml}</td>
+          <td class="col-points"><span class="weight-tag">${r.weight} pt(s)</span>${bonusHtml}</td>
           <td><code>${r.fonte}</code></td>
           <td style="color:var(--text-muted); font-size:0.8rem;">${r.obs || "—"}</td>
         </tr>
