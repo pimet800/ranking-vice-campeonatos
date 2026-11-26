@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -341,8 +341,8 @@
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('geral', this)">🏅 Ranking Geral</button>
     <button class="tab-btn" onclick="switchTab('campeoes', this)">⚔️ Campeões vs. Vices</button>
-    <button class="tab-btn" onclick="switchTab('competicoes', this)">📊 Por Competição</button>
     <button class="tab-btn" onclick="switchTab('clube', this)">🛡️ Histórico do Clube</button>
+    <button class="tab-btn" onclick="switchTab('competicoes', this)">📊 Por Competição</button>
     <button class="tab-btn" onclick="switchTab('cronologia', this)">📈 Evolução Cronológica</button>
     <button class="tab-btn" onclick="switchTab('metodologia', this)">📑 Metodologia & Base</button>
   </nav>
@@ -455,25 +455,7 @@
     </div>
   </section>
 
-  <!-- ABA 3: POR COMPETIÇÃO -->
-  <section id="tab-competicoes" class="tab-section">
-    <div class="comp-grid" id="comp-cards-container"></div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div>
-          <div class="panel-title" id="matrix-panel-title">Matriz Cruzada: Clubes × Competições (Vice-Campeonatos)</div>
-          <div class="panel-sub" id="matrix-panel-sub">Panorama histórico completo de todos os 12 clubes em todas as 10 competições elegíveis</div>
-        </div>
-        <span class="status-pill" id="matrix-mode-pill">Modo: Quantitativo (Vices)</span>
-      </div>
-      <div class="table-wrap">
-        <table id="matrix-table"></table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ABA 4: HISTÓRICO DO CLUBE -->
+  <!-- ABA 3: HISTÓRICO DO CLUBE -->
   <section id="tab-clube" class="tab-section">
     <div class="panel">
       <div class="panel-header">
@@ -515,6 +497,24 @@
           </thead>
           <tbody id="tbody-club-records"></tbody>
         </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 4: POR COMPETIÇÃO -->
+  <section id="tab-competicoes" class="tab-section">
+    <div class="comp-grid" id="comp-cards-container"></div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title" id="matrix-panel-title">Matriz Cruzada: Clubes × Competições (Vice-Campeonatos)</div>
+          <div class="panel-sub" id="matrix-panel-sub">Panorama histórico completo de todos os 12 clubes em todas as 10 competições elegíveis</div>
+        </div>
+        <span class="status-pill" id="matrix-mode-pill">Modo: Quantitativo (Vices)</span>
+      </div>
+      <div class="table-wrap">
+        <table id="matrix-table"></table>
       </div>
     </div>
   </section>
