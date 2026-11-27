@@ -514,7 +514,7 @@
       <div class="kpi-foot" id="kpi-recent-foot">—</div>
     </div>
     <div class="kpi-card blue">
-      <div class="kpi-label">Pior Aproveitamento em Finais</div>
+      <div class="kpi-label">Pior Aproveitamento em Competições</div>
       <div class="kpi-val" id="kpi-worst-rate" style="font-size:1.15rem;">—</div>
       <div class="kpi-foot" id="kpi-worst-rate-foot">—</div>
     </div>
@@ -1195,21 +1195,21 @@
       );
       const pctStr = worst.winRate.toFixed(1).replace(".", ",") + "%";
 
+      const tLabel = worst.titles === 1 ? "Título" : "Títulos";
+      const vLabel = worst.vices === 1 ? "Vice" : "Vices";
+      const cLabel = worst.finals === 1 ? "competição" : "competições";
+
       if (tiedWorst.length === 1) {
         document.getElementById("kpi-worst-rate").innerHTML = `<img src="${worst.crest}" class="crest-sm" alt="${worst.nome}"> ${worst.nome}`;
-        document.getElementById("kpi-worst-rate-foot").textContent = `${pctStr} de aproveitamento (${worst.titles}T / ${worst.vices}V em ${worst.finals} decisões)`;
+        document.getElementById("kpi-worst-rate-foot").textContent = `${pctStr} de aproveitamento (${worst.titles} ${tLabel} / ${worst.vices} ${vLabel} em ${worst.finals} ${cLabel})`;
       } else {
         const crestsHtml = tiedWorst.map(c => `<img src="${c.crest}" class="crest-sm" alt="${c.id}" title="${c.nome}">`).join("");
         const namesText = tiedWorst.length <= 2
           ? tiedWorst.map(c => c.nome).join(" / ")
           : tiedWorst.map(c => c.id).join(" / ");
         document.getElementById("kpi-worst-rate").innerHTML = `${crestsHtml} <span style="font-size:1.05rem;">${namesText}</span>`;
-        document.getElementById("kpi-worst-rate-foot").textContent = `Empate com ${pctStr} (${worst.titles}T / ${worst.vices}V cada)`;
+        document.getElementById("kpi-worst-rate-foot").textContent = `Empate com ${pctStr} (${worst.titles} ${tLabel} / ${worst.vices} ${vLabel} cada)`;
       }
-    } else {
-      document.getElementById("kpi-worst-rate").textContent = "—";
-      document.getElementById("kpi-worst-rate-foot").textContent = "Nenhum vice-campeonato do G12 neste recorte";
-    }
 
     renderRankingTable(list);
     renderVisualBars(list);
