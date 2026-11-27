@@ -504,7 +504,7 @@
       <div class="kpi-foot" id="kpi-leader-foot">—</div>
     </div>
     <div class="kpi-card green">
-      <div class="kpi-label">Mais Vices para adversários fora do G12 (BR)</div>
+      <div class="kpi-label">Mais Vices para Adversários Fora do G12 (BR)</div>
       <div class="kpi-val" id="kpi-nong12-leader">—</div>
       <div class="kpi-foot" id="kpi-nong12-leader-foot">—</div>
     </div>
@@ -514,9 +514,9 @@
       <div class="kpi-foot" id="kpi-recent-foot">—</div>
     </div>
     <div class="kpi-card blue">
-      <div class="kpi-label">Vice Mais Antigo (Não-G12 BR)</div>
-      <div class="kpi-val" id="kpi-nong12-oldest" style="font-size:1.15rem;">—</div>
-      <div class="kpi-foot" id="kpi-nong12-oldest-foot">—</div>
+      <div class="kpi-label">Pior Aproveitamento em Finais</div>
+      <div class="kpi-val" id="kpi-worst-rate" style="font-size:1.15rem;">—</div>
+      <div class="kpi-foot" id="kpi-worst-rate-foot">—</div>
     </div>
   </section>
 
@@ -1128,7 +1128,7 @@
       const tiedClubs = nonG12Ranking.filter(c => c.nonG12Vices === topNonG12.nonG12Vices);
       if (tiedClubs.length === 1) {
         document.getElementById("kpi-nong12-leader").innerHTML = `<img src="${topNonG12.crest}" class="crest-img" alt="${topNonG12.nome}"> ${topNonG12.nome}`;
-        document.getElementById("kpi-nong12-leader-foot").textContent = `${topNonG12.nonG12Vices} vice(s) para campeões brasileiros fora do G12`;
+        document.getElementById("kpi-nong12-leader-foot").textContent = `${topNonG12.nonG12Vices} vice(s) para brasileiros fora do G12`;
       } else {
         const crestsHtml = tiedClubs.map(c => `<img src="${c.crest}" class="crest-sm" alt="${c.id}" title="${c.nome}">`).join("");
         const namesText = tiedClubs.length <= 3
@@ -1178,33 +1178,37 @@
       document.getElementById("kpi-recent-foot").textContent = "Sem registros do G12 no filtro";
     }
 
-    // 4. Card: Vice Mais Antigo de Campeão de Fora do G12 (BR)
-    if (allNonG12ViceEvents.length > 0) {
-      const oldestEvents = [...allNonG12ViceEvents].sort((a, b) => a.ano - b.ano);
-      const firstEv = oldestEvents[0];
-      const sameYearEvents = oldestEvents.filter(e => e.ano === firstEv.ano);
-      const uniqueOldClubs = [];
-      const seenOldIds = new Set();
-      sameYearEvents.forEach(e => {
-        if (!seenOldIds.has(e.clubObj.id)) {
-          seenOldIds.add(e.clubObj.id);
-          uniqueOldClubs.push(e);
-        }
-      });
+    // 4. Card: Pior Aproveitamento em Finais (menor % de títulos sobre títulos + vices; desempate por mais vices)
+    const rateCandidates = Object.values(stats)
+      .map(c => {
+        const finals = c.titles + c.vices;
+        const winRate = finals > 0 ? (c.titles / finals) * 100 : 100;
+        return { ...c, finals, winRate };
+      })
+      .filter(c => c.finals > 0 && c.vices > 0)
+      .sort((a, b) => (a.winRate - b.winRate) || (b.vices - a.vices));
 
-      if (uniqueOldClubs.length === 1) {
-        const cObj = uniqueOldClubs[0].clubObj;
-        document.getElementById("kpi-nong12-oldest").innerHTML = `<img src="${cObj.crest}" class="crest-sm" alt="${cObj.nome}"> ${cObj.nome} (${firstEv.ano})`;
-        document.getElementById("kpi-nong12-oldest-foot").textContent = `${firstEv.comp} • Campeão: ${firstEv.campeao}`;
+    if (rateCandidates.length > 0) {
+      const worst = rateCandidates[0];
+      const tiedWorst = rateCandidates.filter(c =>
+        Math.abs(c.winRate - worst.winRate) < 0.001 && c.vices === worst.vices
+      );
+      const pctStr = worst.winRate.toFixed(1).replace(".", ",") + "%";
+
+      if (tiedWorst.length === 1) {
+        document.getElementById("kpi-worst-rate").innerHTML = `<img src="${worst.crest}" class="crest-sm" alt="${worst.nome}"> ${worst.nome}`;
+        document.getElementById("kpi-worst-rate-foot").textContent = `${pctStr} de aproveitamento (${worst.titles}T / ${worst.vices}V em ${worst.finals} decisões)`;
       } else {
-        const crestsHtml = uniqueOldClubs.map(e => `<img src="${e.clubObj.crest}" class="crest-sm" alt="${e.clubObj.id}">`).join("");
-        const idsText = uniqueOldClubs.map(e => e.clubObj.id).join(" / ");
-        document.getElementById("kpi-nong12-oldest").innerHTML = `${crestsHtml} <span>${idsText} (${firstEv.ano})</span>`;
-        document.getElementById("kpi-nong12-oldest-foot").textContent = `${firstEv.comp} • Campeão: ${firstEv.campeao}`;
+        const crestsHtml = tiedWorst.map(c => `<img src="${c.crest}" class="crest-sm" alt="${c.id}" title="${c.nome}">`).join("");
+        const namesText = tiedWorst.length <= 2
+          ? tiedWorst.map(c => c.nome).join(" / ")
+          : tiedWorst.map(c => c.id).join(" / ");
+        document.getElementById("kpi-worst-rate").innerHTML = `${crestsHtml} <span style="font-size:1.05rem;">${namesText}</span>`;
+        document.getElementById("kpi-worst-rate-foot").textContent = `Empate com ${pctStr} (${worst.titles}T / ${worst.vices}V cada)`;
       }
     } else {
-      document.getElementById("kpi-nong12-oldest").textContent = "—";
-      document.getElementById("kpi-nong12-oldest-foot").textContent = "Nenhum vice para campeão brasileiro fora do G12";
+      document.getElementById("kpi-worst-rate").textContent = "—";
+      document.getElementById("kpi-worst-rate-foot").textContent = "Nenhum vice-campeonato do G12 neste recorte";
     }
 
     renderRankingTable(list);
