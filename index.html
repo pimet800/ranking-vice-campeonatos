@@ -1577,7 +1577,7 @@
     const s = fullStats[clubId];
     if (!s) return;
 
-    // 1. Carrasco (Freguesia): quem mais deixou o clube com o vice
+    // 1. Carrasco: quem mais deixou o clube com o vice
     const carrascoMap = {};
     s.records.forEach(r => {
       if (!carrascoMap[r.campeao]) carrascoMap[r.campeao] = [];
@@ -1644,7 +1644,7 @@
       secaDesc = (isOngoing
         ? `Maior jejum do ${s.nome} na base (em andamento desde ${gapStart}). `
         : `Maior período sem títulos do ${s.nome}, entre ${gapStart} e ${gapEnd}. `) +
-        `<br><span style="font-size:0.72rem; opacity:0.85;">*Base considera apenas competições ativas/equiparadas (exclui torneios extintos).</span>`;
+        `<br><br><span style="font-size:0.72rem; opacity:0.85;">*Base considera apenas competições ativas/equiparadas (exclui torneios extintos).</span>`;
     }
 
     // 3. Vítima Favorita: quem o clube mais vezes derrotou para ser campeão
@@ -1710,7 +1710,7 @@
 
     // 5. Vices para Clubes Brasileiros de Fora do G12
     const nonG12Events = s.records.filter(r => NON_G12_BRAZILIAN_CLUBS.has(r.campeao)).sort((a, b) => b.ano - a.ano);
-    const nonG12Val = `${nonG12Events.length} vez(es)`;
+    const nonG12Val = `${nonG12Events.length} vezes`;
     let nonG12Desc = `O ${s.nome} nunca foi vice para um clube brasileiro fora do G12 nesta base.`;
     if (nonG12Events.length > 0) {
       const sample = nonG12Events.slice(0, 4).map(r => `${r.campeao} (${r.ano})`).join(", ");
