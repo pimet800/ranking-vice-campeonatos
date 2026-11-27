@@ -1178,7 +1178,7 @@
       document.getElementById("kpi-recent-foot").textContent = "Sem registros do G12 no filtro";
     }
 
-    // 4. Card: Pior Aproveitamento em Finais (menor % de títulos sobre títulos + vices; desempate por mais vices)
+    // 4. Card: Pior Aproveitamento em Competições (menor % de títulos sobre títulos + vices; desempate por mais vices)
     const rateCandidates = Object.values(stats)
       .map(c => {
         const finals = c.titles + c.vices;
@@ -1194,7 +1194,6 @@
         Math.abs(c.winRate - worst.winRate) < 0.001 && c.vices === worst.vices
       );
       const pctStr = worst.winRate.toFixed(1).replace(".", ",") + "%";
-
       const tLabel = worst.titles === 1 ? "Título" : "Títulos";
       const vLabel = worst.vices === 1 ? "Vice" : "Vices";
       const cLabel = worst.finals === 1 ? "competição" : "competições";
@@ -1210,6 +1209,10 @@
         document.getElementById("kpi-worst-rate").innerHTML = `${crestsHtml} <span style="font-size:1.05rem;">${namesText}</span>`;
         document.getElementById("kpi-worst-rate-foot").textContent = `Empate com ${pctStr} (${worst.titles} ${tLabel} / ${worst.vices} ${vLabel} cada)`;
       }
+    } else {
+      document.getElementById("kpi-worst-rate").textContent = "—";
+      document.getElementById("kpi-worst-rate-foot").textContent = "Nenhum vice-campeonato do G12 neste recorte";
+    }
 
     renderRankingTable(list);
     renderVisualBars(list);
