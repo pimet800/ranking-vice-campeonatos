@@ -66,7 +66,40 @@
 
     /* CONTROLS */
     .controls-bar {
-      display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+      display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .control-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding-left: 2px;
+    }
+    .help-tip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      cursor: help;
+      border: 1px solid var(--border);
+    }
+    .help-tip:hover {
+      color: var(--accent-green);
+      border-color: var(--accent-green);
     }
     .segmented {
       display: inline-flex; background: var(--bg-surface); padding: 4px;
@@ -406,19 +439,37 @@
       </div>
 
       <div class="controls-bar">
-        <div class="segmented" role="group" aria-label="Modo de Pontuação">
-          <button id="btn-mode-quant" class="active" onclick="setMode('quant')">Quantitativo (Bruto)</button>
-          <button id="btn-mode-weight" onclick="setMode('weight')">Ponderado (Pesos)</button>
+        <div class="control-group">
+          <span class="control-label">
+            Critério de Pontuação
+            <span class="help-tip" title="Quantitativo: cada vice vale 1. Ponderado: aplica pesos de 1 a 8 por torneio + bônus por vice para brasileiro fora do G12.">?</span>
+          </span>
+          <div class="segmented" role="group" aria-label="Modo de Pontuação">
+            <button id="btn-mode-quant" class="active" onclick="setMode('quant')">Quantitativo (Bruto)</button>
+            <button id="btn-mode-weight" onclick="setMode('weight')">Ponderado (Pesos)</button>
+          </div>
         </div>
 
-        <select id="sel-1987" class="control-select" onchange="setScenario1987(this.value)">
-          <option value="A">1987 • Cenário A (Sport único campeão / Guarani vice)</option>
-          <option value="B">1987 • Cenário B (Sport e Flamengo campeões / Internacional e Guarani vices)</option>
-        </select>
+        <div class="control-group">
+          <span class="control-label">
+            Brasileirão de 1987
+            <span class="help-tip" title="Alterna o critério histórico de 1987 entre Sport único campeão (Cenário A) e títulos divididos entre Sport e Flamengo (Cenário B).">?</span>
+          </span>
+          <select id="sel-1987" class="control-select" onchange="setScenario1987(this.value)">
+            <option value="A">1987 • Cenário A (Sport único campeão / Guarani vice)</option>
+            <option value="B">1987 • Cenário B (Sport e Flamengo campeões / Internacional e Guarani vices)</option>
+          </select>
+        </div>
 
-        <select id="sel-comp" class="control-select" onchange="setCompFilter(this.value)">
-          <option value="ALL">Competição: Todas (10 elegíveis)</option>
-        </select>
+        <div class="control-group">
+          <span class="control-label">
+            Filtrar Competição
+            <span class="help-tip" title="Exibe o consolidado de todas as 10 competições elegíveis ou recorta o painel para um torneio específico.">?</span>
+          </span>
+          <select id="sel-comp" class="control-select" onchange="setCompFilter(this.value)">
+            <option value="ALL">Todas as competições (10 elegíveis)</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -1577,7 +1628,7 @@
     const s = fullStats[clubId];
     if (!s) return;
 
-    // 1. Carrasco: quem mais deixou o clube com o vice
+    // 1. Carrasco (Freguesia): quem mais deixou o clube com o vice
     const carrascoMap = {};
     s.records.forEach(r => {
       if (!carrascoMap[r.campeao]) carrascoMap[r.campeao] = [];
