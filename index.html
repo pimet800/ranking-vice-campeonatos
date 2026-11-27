@@ -283,6 +283,104 @@
     }
     .btn-action:hover { border-color: var(--accent-green); color: var(--accent-green); }
 
+    /* DOSSIÊ DO CLUBE (RAIO-X & SALA DE TROFÉUS) */
+    .dossier-divider {
+      margin: 1.75rem 0 1.25rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.25rem;
+    }
+    .raiox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .raiox-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.05rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .raiox-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent-blue);
+    }
+    .raiox-card.red::before { background: var(--accent-red); }
+    .raiox-card.gold::before { background: var(--accent-gold); }
+    .raiox-card.green::before { background: var(--accent-green); }
+    .raiox-card.purple::before { background: var(--accent-purple); }
+    .raiox-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .raiox-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.35rem;
+    }
+    .raiox-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .trophy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.9rem;
+    }
+    .trophy-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.95rem 1.05rem;
+    }
+    .trophy-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.45rem;
+    }
+    .trophy-comp {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .trophy-count {
+      background: rgba(16,185,129,0.16);
+      color: var(--accent-green);
+      border: 1px solid rgba(16,185,129,0.3);
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .trophy-years {
+      font-size: 0.79rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      word-spacing: 2px;
+    }
+
     /* METODOLOGIA RULES */
     .rules-list { display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 1.25rem; }
     .rule-item {
@@ -497,6 +595,28 @@
           </thead>
           <tbody id="tbody-club-records"></tbody>
         </table>
+      </div>
+
+      <!-- DOSSIÊ COMPLETO DO CLUBE (IGNORA FILTRO DE COMPETIÇÃO DO TOPO) -->
+      <div class="dossier-divider">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">🔍 Raio-X & Curiosidades Históricas</div>
+            <div class="panel-sub">Panorama completo do clube em todas as 10 competições elegíveis (ignora o filtro de competição do topo)</div>
+          </div>
+          <span class="status-pill">Base Completa do Clube</span>
+        </div>
+        <div class="raiox-grid" id="club-raiox-grid"></div>
+      </div>
+
+      <div class="dossier-divider">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">🏆 Sala de Troféus</div>
+            <div class="panel-sub" id="club-trophy-sub">Conquistas oficiais registradas na base auditada (todas as competições elegíveis)</div>
+          </div>
+        </div>
+        <div class="trophy-grid" id="club-trophy-grid"></div>
       </div>
     </div>
   </section>
@@ -1446,6 +1566,216 @@
         </tr>
       `;
     }).join("") || `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Nenhum registro encontrado.</td></tr>`;
+
+    renderClubDossier(state.selectedClub);
+  }
+
+  function renderClubDossier(clubId) {
+    // Lê sempre a base completa (todas as 10 competições), ignorando state.compFilter
+    const allRecords = getExpandedRecords();
+    const { stats: fullStats } = computeAllCompetitionsStats();
+    const s = fullStats[clubId];
+    if (!s) return;
+
+    // 1. Carrasco (Freguesia): quem mais deixou o clube com o vice
+    const carrascoMap = {};
+    s.records.forEach(r => {
+      if (!carrascoMap[r.campeao]) carrascoMap[r.campeao] = [];
+      carrascoMap[r.campeao].push(r.ano);
+    });
+    const carrascoEntries = Object.entries(carrascoMap).sort((a, b) => b[1].length - a[1].length);
+    let carrascoVal = "—";
+    let carrascoDesc = "Nenhum vice-campeonato registrado na base.";
+    if (carrascoEntries.length > 0) {
+      const maxC = carrascoEntries[0][1].length;
+      const topCarrascos = carrascoEntries.filter(e => e[1].length === maxC);
+      carrascoVal = topCarrascos.map(([id]) => {
+        const obj = CLUB_MAP[id];
+        return obj ? `<img src="${obj.crest}" class="crest-sm" alt="${obj.nome}"> ${obj.nome}` : id;
+      }).join(" / ");
+      const verb = topCarrascos.length > 1 ? "foram os maiores algozes" : "foi o maior algoz";
+      carrascoDesc = `${verb} do ${s.nome}, deixando-o com o vice em <strong>${maxC}</strong> ocasião(ões).`;
+    }
+
+    // Coleta títulos únicos do clube na base completa (para Seca, Vítima Favorita e Sala de Troféus)
+    const countedTitles = new Set();
+    const clubTitleEvents = [];
+    allRecords.forEach(r => {
+      if (r.campeao === clubId) {
+        const obsClean = (r.obs || "").toLowerCase();
+        const isDistinct1967 = obsClean.includes("taça brasil") ? "TB" : obsClean.includes("roberto gomes pedrosa") ? "RGP" : "";
+        const key = `${r.campeao}|${r.ano}|${r.comp}|${r.fonte}|${isDistinct1967}`;
+        if (!countedTitles.has(key)) {
+          countedTitles.add(key);
+          clubTitleEvents.push(r);
+        }
+      }
+    });
+
+    // 2. Maior Seca (Jejum entre títulos)
+    const titleYears = [...new Set(clubTitleEvents.map(r => r.ano))].sort((a, b) => a - b);
+    let secaVal = "—";
+    let secaDesc = "Sem títulos registrados na base para calcular intervalo.";
+    if (titleYears.length > 0) {
+      let maxGap = 0;
+      let gapStart = titleYears[0];
+      let gapEnd = titleYears[0];
+      let isOngoing = false;
+
+      for (let i = 1; i < titleYears.length; i++) {
+        const gap = titleYears[i] - titleYears[i - 1];
+        if (gap > maxGap) {
+          maxGap = gap;
+          gapStart = titleYears[i - 1];
+          gapEnd = titleYears[i];
+          isOngoing = false;
+        }
+      }
+      const currentYear = 2026;
+      const ongoingGap = currentYear - titleYears[titleYears.length - 1];
+      if (ongoingGap > maxGap) {
+        maxGap = ongoingGap;
+        gapStart = titleYears[titleYears.length - 1];
+        gapEnd = currentYear;
+        isOngoing = true;
+      }
+
+      secaVal = `${maxGap} anos (${gapStart}–${gapEnd})`;
+      secaDesc = (isOngoing
+        ? `Maior jejum do ${s.nome} na base (em andamento desde ${gapStart}). `
+        : `Maior período sem títulos do ${s.nome}, entre ${gapStart} e ${gapEnd}. `) +
+        `<br><span style="font-size:0.72rem; opacity:0.85;">*Base considera apenas competições ativas/equiparadas (exclui torneios extintos).</span>`;
+    }
+
+    // 3. Vítima Favorita: quem o clube mais vezes derrotou para ser campeão
+    const vitimaMap = {};
+    clubTitleEvents.forEach(r => {
+      if (r.vice && !r.vice.startsWith("Nenhum")) {
+        if (!vitimaMap[r.vice]) vitimaMap[r.vice] = [];
+        vitimaMap[r.vice].push(r.ano);
+      }
+    });
+    const vitimaEntries = Object.entries(vitimaMap).sort((a, b) => b[1].length - a[1].length);
+    let vitimaVal = "—";
+    let vitimaDesc = "Sem dados suficientes de vice-campeões derrotados.";
+    if (vitimaEntries.length > 0) {
+      const maxV = vitimaEntries[0][1].length;
+      const topVitimas = vitimaEntries.filter(e => e[1].length === maxV);
+      vitimaVal = topVitimas.map(([id]) => {
+        const obj = CLUB_MAP[id];
+        return obj ? `<img src="${obj.crest}" class="crest-sm" alt="${obj.nome}"> ${obj.nome}` : id;
+      }).join(" / ");
+      const verb = topVitimas.length > 1 ? "foram as maiores vítimas" : "foi a maior vítima";
+      vitimaDesc = `${verb} do ${s.nome}, ficando com o vice em <strong>${maxV}</strong> título(s) do clube.`;
+    }
+
+    // 4. Década com Maior Sequência / Acúmulo de Vices
+    const decMap = {};
+    s.records.forEach(r => {
+      const dec = Math.floor(r.ano / 10) * 10;
+      decMap[dec] = (decMap[dec] || 0) + 1;
+    });
+    const decEntries = Object.entries(decMap).sort((a, b) => b[1] - a[1]);
+
+    // Calcula também maior sequência de anos consecutivos com pelo menos 1 vice
+    const uniqueViceYears = [...new Set(s.records.map(r => r.ano))].sort((a, b) => a - b);
+    let bestStreak = 0, streakStart = 0, streakEnd = 0;
+    let curStreak = 0, curStart = 0;
+    for (let i = 0; i < uniqueViceYears.length; i++) {
+      if (i === 0 || uniqueViceYears[i] === uniqueViceYears[i - 1] + 1) {
+        if (curStreak === 0) curStart = uniqueViceYears[i];
+        curStreak++;
+      } else {
+        curStreak = 1;
+        curStart = uniqueViceYears[i];
+      }
+      if (curStreak > bestStreak) {
+        bestStreak = curStreak;
+        streakStart = curStart;
+        streakEnd = uniqueViceYears[i];
+      }
+    }
+
+    let decVal = "—";
+    let decDesc = "Sem vice-campeonatos registrados.";
+    if (decEntries.length > 0) {
+      const maxD = decEntries[0][1];
+      const topDecs = decEntries.filter(e => e[1] === maxD).map(e => `${e[0]}s`);
+      decVal = `${topDecs.join(" / ")} (${maxD} vices)`;
+      decDesc = `Década(s) com mais vices do ${s.nome}.`;
+      if (bestStreak >= 2) {
+        decDesc += ` Maior sequência consecutiva: <strong>${bestStreak} anos seguidos</strong> (${streakStart}–${streakEnd}).`;
+      }
+    }
+
+    // 5. Vices para Clubes Brasileiros de Fora do G12
+    const nonG12Events = s.records.filter(r => NON_G12_BRAZILIAN_CLUBS.has(r.campeao)).sort((a, b) => b.ano - a.ano);
+    const nonG12Val = `${nonG12Events.length} vez(es)`;
+    let nonG12Desc = `O ${s.nome} nunca foi vice para um clube brasileiro fora do G12 nesta base.`;
+    if (nonG12Events.length > 0) {
+      const sample = nonG12Events.slice(0, 4).map(r => `${r.campeao} (${r.ano})`).join(", ");
+      const extra = nonG12Events.length > 4 ? ` e mais ${nonG12Events.length - 4}` : "";
+      nonG12Desc = `Perdeu decisões para não-G12 (BR) como: ${sample}${extra}.`;
+    }
+
+    document.getElementById("club-raiox-grid").innerHTML = `
+      <div class="raiox-card red">
+        <div class="raiox-label">😈 Carrasco (Freguesia)</div>
+        <div class="raiox-val">${carrascoVal}</div>
+        <div class="raiox-desc">${carrascoDesc}</div>
+      </div>
+      <div class="raiox-card gold">
+        <div class="raiox-label">⏳ Maior Seca (Jejum)</div>
+        <div class="raiox-val">${secaVal}</div>
+        <div class="raiox-desc">${secaDesc}</div>
+      </div>
+      <div class="raiox-card green">
+        <div class="raiox-label">🎯 Vítima Favorita</div>
+        <div class="raiox-val">${vitimaVal}</div>
+        <div class="raiox-desc">${vitimaDesc}</div>
+      </div>
+      <div class="raiox-card purple">
+        <div class="raiox-label">📉 Década com Mais Vices</div>
+        <div class="raiox-val">${decVal}</div>
+        <div class="raiox-desc">${decDesc}</div>
+      </div>
+      <div class="raiox-card">
+        <div class="raiox-label">⚠️ Vices p/ Fora do G12 (BR)</div>
+        <div class="raiox-val">${nonG12Val}</div>
+        <div class="raiox-desc">${nonG12Desc}</div>
+      </div>
+    `;
+
+    // SALA DE TROFÉUS: agrupa títulos por competição na ordem oficial de COMPETITIONS
+    document.getElementById("club-trophy-sub").textContent =
+      `De acordo com a base auditada, o ${s.nome} soma ${clubTitleEvents.length} título(s) oficial(is) distribuídos nas competições abaixo:`;
+
+    const trophyHtml = COMPETITIONS.map(cp => {
+      const evs = clubTitleEvents.filter(r => r.comp === cp.name);
+      if (evs.length === 0) return "";
+
+      // Agrupa anos repetidos (ex: 1967 (2x) ou 1979 (2x))
+      const yearCounts = {};
+      evs.forEach(r => { yearCounts[r.ano] = (yearCounts[r.ano] || 0) + 1; });
+      const yearsFormatted = Object.keys(yearCounts)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .map(y => yearCounts[y] > 1 ? `${y} (${yearCounts[y]}x)` : `${y}`)
+        .join(", ");
+
+      return `
+        <div class="trophy-card">
+          <div class="trophy-head">
+            <span class="trophy-comp">${cp.name}</span>
+            <span class="trophy-count">${evs.length} título${evs.length > 1 ? "s" : ""}</span>
+          </div>
+          <div class="trophy-years">${yearsFormatted}</div>
+        </div>
+      `;
+    }).filter(Boolean).join("");
+
+    document.getElementById("club-trophy-grid").innerHTML =
+      trophyHtml || `<div style="font-size:0.85rem; color:var(--text-muted);">Nenhum título registrado na base para este clube.</div>`;
   }
 
   function renderEvolution(records, stats) {
