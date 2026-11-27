@@ -1747,8 +1747,8 @@
     `;
 
     // SALA DE TROFÉUS: agrupa títulos por competição na ordem oficial de COMPETITIONS
-    document.getElementById("club-trophy-sub").textContent =
-      `De acordo com a base auditada, <strong>o ${s.nome} soma ${clubTitleEvents.length} títulos oficialis</strong> distribuídos nas competições abaixo:`;
+    document.getElementById("club-trophy-sub").innerHTML =
+      `De acordo com a base auditada, <strong>o ${s.nome} soma ${clubTitleEvents.length} títulos oficiais</strong> distribuídos nas competições abaixo:`;
 
     const trophyHtml = COMPETITIONS.map(cp => {
       const evs = clubTitleEvents.filter(r => r.comp === cp.name);
